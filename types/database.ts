@@ -1,0 +1,72 @@
+export enum PetGender {
+  MALE = 'MALE',
+  FEMALE = 'FEMALE'
+}
+
+export enum PetSize {
+  SMALL = 'SMALL',
+  MEDIUM = 'MEDIUM',
+  LARGE = 'LARGE'
+}
+
+export enum PostType {
+  LOST = 'LOST',
+  FOUND = 'FOUND',
+  ADOPTION = 'ADOPTION'
+}
+
+export enum PostStatus {
+  ACTIVE = 'ACTIVE',
+  RESOLVED = 'RESOLVED',
+  CANCELED = 'CANCELED'
+}
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  password: string;
+  avatar?: string;
+  whatsapp?: string;
+  instagram?: string;
+  contactPreference?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  pets: Pet[];
+  posts: Post[];
+}
+
+export interface Pet {
+  id: string;
+  name: string;
+  type: string;
+  breed: string;
+  age: string;
+  gender: PetGender;
+  size: PetSize;
+  image?: string;
+  description: string;
+  castrated: boolean;
+  vaccinated: boolean;
+  location: string;
+  createdAt: Date;
+  updatedAt: Date;
+  userId: string;
+  user: User;
+  posts: Post[];
+}
+
+export interface Post {
+  id: string;
+  title: string;
+  content: string;
+  petId: string;
+  pet: Pet;
+  userId: string;
+  user: User;
+  type: PostType;
+  location: string;
+  status: PostStatus;
+  createdAt: Date;
+  updatedAt: Date;
+}
