@@ -3,9 +3,16 @@
   "compilerOptions": {
     "strict": true,
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["./*"],
+      "@components/*": ["./components/*"],
+      "@hooks/*": ["./hooks/*"],
+      "@contexts/*": ["./contexts/*"],
+      "@services/*": ["./services/*"],
+      "@lib/*": ["./lib/*"],
+      "@theme/*": ["./theme/*"],
+      "@types/*": ["./types/*"],
+      "@assets/*": ["./assets/*"],
+      "@app/*": ["./app/*"]
     }
   },
   "include": [
