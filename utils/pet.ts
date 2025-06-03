@@ -1,28 +1,25 @@
-import { PetGender, PetSize } from '@/types/database';
-
-export type PetType = 'DOG' | 'CAT';
-export type PostType = 'ADOPTION' | 'LOST' | 'FOUND';
+import { PetGender, PetSize, PetType, PostType } from '@/types/database';
 
 export const PET_TYPE_LABELS: Record<PetType, string> = {
-  DOG: 'Cachorro',
-  CAT: 'Gato',
+  [PetType.DOG]: 'Cachorro',
+  [PetType.CAT]: 'Gato',
 };
 
 export const PET_GENDER_LABELS: Record<PetGender, string> = {
-  MALE: 'Macho',
-  FEMALE: 'Fêmea',
+  [PetGender.MALE]: 'Macho',
+  [PetGender.FEMALE]: 'Fêmea',
 };
 
 export const PET_SIZE_LABELS: Record<PetSize, string> = {
-  SMALL: 'Pequeno',
-  MEDIUM: 'Médio',
-  LARGE: 'Grande',
+  [PetSize.SMALL]: 'Pequeno',
+  [PetSize.MEDIUM]: 'Médio',
+  [PetSize.LARGE]: 'Grande',
 };
 
 export const POST_TYPE_LABELS: Record<PostType, string> = {
-  ADOPTION: 'Adoção',
-  LOST: 'Perdido',
-  FOUND: 'Encontrado',
+  [PostType.ADOPTION]: 'Adoção',
+  [PostType.LOST]: 'Perdido',
+  [PostType.FOUND]: 'Encontrado',
 };
 
 export const getPetTypeLabel = (type: PetType): string => PET_TYPE_LABELS[type];

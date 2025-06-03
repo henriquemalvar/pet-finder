@@ -1,9 +1,11 @@
+import { PetImage } from '@/components/PetImage';
+import { Pet } from '@/types/database';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import React from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface ImageHeaderProps {
-  imageUrl?: string | null;
+  pet: Pet;
   onClose: () => void;
   badgeText: string;
   badgeIcon: string;
@@ -11,7 +13,7 @@ interface ImageHeaderProps {
 }
 
 export const ImageHeader: React.FC<ImageHeaderProps> = ({
-  imageUrl,
+  pet,
   onClose,
   badgeText,
   badgeIcon,
@@ -19,10 +21,7 @@ export const ImageHeader: React.FC<ImageHeaderProps> = ({
 }) => {
   return (
     <View style={styles.imageWrapper}>
-      <Image
-        source={imageUrl ? { uri: imageUrl } : require('@assets/images/default-dog.png')}
-        style={styles.image}
-      />
+      <PetImage pet={pet} />
       <TouchableOpacity style={styles.closeButton} onPress={onClose}>
         <MaterialCommunityIcons name="close" size={28} color="#222" />
       </TouchableOpacity>

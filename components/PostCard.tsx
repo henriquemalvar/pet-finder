@@ -1,7 +1,9 @@
+import { PetImage } from '@/components/PetImage';
+import { PetType, Post } from '@/types/database';
+import { getPetTypeLabel } from '@/utils/pet';
 import { Ionicons } from '@expo/vector-icons';
-import { Post } from '@services/posts';
 import { useRouter } from 'expo-router';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface PostCardProps extends Post {
   showActions?: boolean;
@@ -16,7 +18,7 @@ export function PostCard({ showActions = false, onEdit, onDelete, ...props }: Po
     router.push(`/post/${props.id}`);
   };
 
-  const formatDate = (date: string) => {
+  const formatDate = (date: Date | string) => {
     return new Date(date).toLocaleDateString('pt-BR', {
       day: '2-digit',
       month: '2-digit',
@@ -25,41 +27,28 @@ export function PostCard({ showActions = false, onEdit, onDelete, ...props }: Po
   };
 
   const getTypeLabel = (type: Post['type']) => {
-    switch (type) {
-      case 'ADOPTION':
-        return 'Adoção';
-      case 'LOST':
-        return 'Perdido';
-      case 'FOUND':
-        return 'Encontrado';
-      default:
-        return type;
+    const options = {
+      'ADOPTION': 'Adoção',
+      'LOST': 'Perdido',
+      'FOUND': 'Encontrado',
     }
-  };
-
-  const getDefaultImage = (petType: string) => {
-    switch (petType.toLowerCase()) {
-      case 'dog':
-      case 'cachorro':
-        return require('../assets/images/default-dog.png');
-      case 'cat':
-      case 'gato':
-        return require('../assets/images/default-cat.png');
-      default:
-        return require('../assets/images/default-dog.png');
-    }
+    return options[type];
   };
 
   return (
     <TouchableOpacity style={styles.container} onPress={handlePress}>
-      <Image
-        source={props.pet.image ? { uri: props.pet.image } : getDefaultImage(props.pet.type)}
-        style={styles.image}
-      />
+      <PetImage pet={props.pet} style={styles.image} />
       <View style={styles.content}>
         <View style={styles.header}>
           <Text style={styles.name}>{props.pet.name}</Text>
-          <Text style={styles.type}>{getTypeLabel(props.type)}</Text>
+          <View style={styles.badges}>
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>{getPetTypeLabel(props.pet.type as PetType)}</Text>
+            </View>
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>{getTypeLabel(props.type)}</Text>
+            </View>
+          </View>
         </View>
         <Text style={styles.breed}>{props.pet.breed}</Text>
         <Text style={styles.location}>{props.location}</Text>
@@ -113,21 +102,29 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     marginBottom: 8,
   },
   name: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#333',
+    flex: 1,
   },
-  type: {
-    fontSize: 14,
-    color: '#666',
+  badges: {
+    flexDirection: 'row',
+    gap: 4,
+  },
+  badge: {
     backgroundColor: '#f0f0f0',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 4,
+  },
+  badgeText: {
+    fontSize: 12,
+    color: '#666',
+    fontWeight: '500',
   },
   breed: {
     fontSize: 16,

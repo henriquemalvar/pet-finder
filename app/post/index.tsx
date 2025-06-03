@@ -1,7 +1,9 @@
 import { ListSkeleton } from '@/components/skeletons/ListSkeleton';
 import { Header } from '@/components/ui/Header';
+import { PetImage } from '@/components/PetImage';
+import { Post } from '@/types/database';
 import { Ionicons } from '@expo/vector-icons';
-import { Post, postsService } from '@services/posts';
+import { postsService } from '@services/posts';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -18,7 +20,7 @@ export default function PostList() {
     try {
       setError(null);
       const data = await postsService.list();
-      setPosts(data);
+      setPosts(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Erro ao carregar posts:', error);
       setError('Não foi possível carregar a lista de posts');
@@ -46,10 +48,7 @@ export default function PostList() {
       style={styles.postCard}
       onPress={() => handlePostPress(item.id)}
     >
-      <Image
-        source={item.pet.image ? { uri: item.pet.image } : require('@assets/images/default-dog.png')}
-        style={styles.postImage}
-      />
+      <PetImage pet={item.pet} style={styles.postImage} />
       <View style={styles.postInfo}>
         <Text style={styles.postTitle}>{item.pet.name}</Text>
         <Text style={styles.postDescription} numberOfLines={2}>

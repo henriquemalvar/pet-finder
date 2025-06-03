@@ -1,3 +1,4 @@
+import { PetImage } from '@/components/PetImage';
 import { ListSkeleton } from '@/components/skeletons/ListSkeleton';
 import { Header } from '@/components/ui/Header';
 import { Ionicons } from '@expo/vector-icons';
@@ -5,7 +6,7 @@ import { useAuth } from '@hooks/useAuth';
 import { Pet, petsService } from '@services/pets';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function PetList() {
@@ -48,10 +49,7 @@ export default function PetList() {
       style={styles.petCard}
       onPress={() => handlePetPress(item.id)}
     >
-      <Image
-        source={item.images?.[0] ? { uri: item.images[0] } : require('@assets/images/default-dog.png')}
-        style={styles.petImage}
-      />
+      <PetImage pet={item} style={styles.petImage} />
       <View style={styles.petInfo}>
         <Text style={styles.petName}>{item.name}</Text>
         <Text style={styles.petBreed}>{item.breed}</Text>

@@ -1,13 +1,14 @@
+import { PetImage } from '@/components/PetImage';
 import { PetDetailsSkeleton } from '@/components/skeletons/PetDetailsSkeleton';
 import { Header } from '@/components/ui/Header';
 import { showToast } from '@/components/ui/Toast';
-import { PetGender, PetSize } from '@/types/database';
-import { getPetGenderLabel, getPetSizeLabel, getPetTypeLabel, PetType } from '@/utils/pet';
+import { Pet, PetGender, PetSize, PetType } from '@/types/database';
+import { getPetGenderLabel, getPetSizeLabel, getPetTypeLabel } from '@/utils/pet';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Pet, petsService } from '@services/pets';
+import { petsService } from '@services/pets';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function PetDetails() {
@@ -67,10 +68,7 @@ export default function PetDetails() {
       <Header title="Detalhes do Pet" showBackButton />
       <ScrollView style={styles.content} contentContainerStyle={{ paddingBottom: 32 }}>
         <View style={styles.imageWrapper}>
-          <Image
-            source={pet.images?.[0] ? { uri: pet.images[0] } : require('@assets/images/default-dog.png')}
-            style={styles.image}
-          />
+          <PetImage pet={pet} />
           <TouchableOpacity style={styles.closeButton} onPress={() => router.back()}>
             <MaterialCommunityIcons name="close" size={28} color="#222" />
           </TouchableOpacity>

@@ -1,4 +1,4 @@
-import { Pet, PetGender, PetSize } from '@/types/database';
+import { Pet, PetGender, PetSize, PetType } from '@/types/database';
 import { getPetGenderLabel, getPetSizeLabel, getPetTypeLabel } from '@/utils/pet';
 import { Ionicons } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -9,7 +9,7 @@ import { z } from 'zod';
 
 const petSchema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
-  type: z.enum(['DOG', 'CAT']),
+  type: z.nativeEnum(PetType),
   breed: z.string().min(1, 'Raça é obrigatória'),
   age: z.string().min(1, 'Idade é obrigatória'),
   gender: z.nativeEnum(PetGender),
@@ -33,7 +33,7 @@ export function PetForm({ initialData, onSubmit, submitLabel = 'Cadastrar' }: Pe
     resolver: zodResolver(petSchema),
     defaultValues: {
       name: initialData?.name || '',
-      type: (initialData?.type || 'DOG') as 'DOG' | 'CAT',
+      type: (initialData?.type || PetType.DOG) as PetType,
       breed: initialData?.breed || '',
       age: initialData?.age || '',
       gender: initialData?.gender || PetGender.MALE,
@@ -84,39 +84,39 @@ export function PetForm({ initialData, onSubmit, submitLabel = 'Cadastrar' }: Pe
                   <TouchableOpacity
                     style={[
                       styles.typeButton,
-                      value === 'DOG' && styles.typeButtonSelected
+                      value === PetType.DOG && styles.typeButtonSelected
                     ]}
-                    onPress={() => onChange('DOG')}
+                    onPress={() => onChange(PetType.DOG)}
                   >
                     <Ionicons
                       name="paw"
                       size={24}
-                      color={value === 'DOG' ? '#fff' : '#666'}
+                      color={value === PetType.DOG ? '#fff' : '#666'}
                     />
                     <Text style={[
                       styles.typeButtonText,
-                      value === 'DOG' && styles.typeButtonTextSelected
+                      value === PetType.DOG && styles.typeButtonTextSelected
                     ]}>
-                      {getPetTypeLabel('DOG')}
+                      {getPetTypeLabel(PetType.DOG)}
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[
                       styles.typeButton,
-                      value === 'CAT' && styles.typeButtonSelected
+                      value === PetType.CAT && styles.typeButtonSelected
                     ]}
-                    onPress={() => onChange('CAT')}
+                    onPress={() => onChange(PetType.CAT)}
                   >
                     <Ionicons
                       name="paw"
                       size={24}
-                      color={value === 'CAT' ? '#fff' : '#666'}
+                      color={value === PetType.CAT ? '#fff' : '#666'}
                     />
                     <Text style={[
                       styles.typeButtonText,
-                      value === 'CAT' && styles.typeButtonTextSelected
+                      value === PetType.CAT && styles.typeButtonTextSelected
                     ]}>
-                      {getPetTypeLabel('CAT')}
+                      {getPetTypeLabel(PetType.CAT)}
                     </Text>
                   </TouchableOpacity>
                 </React.Fragment>

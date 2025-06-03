@@ -1,10 +1,11 @@
+import { PetImage } from '@/components/PetImage';
 import { Pet } from '@/types/database';
 import { getPetGenderLabel, getPetSizeLabel, getPetTypeLabel } from '@/utils/pet';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Divider, Menu } from 'react-native-paper';
 
 interface PetListTileProps {
@@ -66,10 +67,7 @@ export function PetListTile({
         delayLongPress={200}
       >
         <View style={styles.imageContainer}>
-          <Image
-            source={pet.image ? { uri: pet.image } : require('@assets/images/default-dog.png')}
-            style={styles.image}
-          />
+          <PetImage pet={pet} style={styles.image} />
           {selected && (
             <View style={styles.checkContainer}>
               <Ionicons name="checkmark-circle" size={24} color="#007AFF" />

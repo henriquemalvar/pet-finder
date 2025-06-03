@@ -1,7 +1,7 @@
 import { PetForm } from '@/components/PetForm';
 import { Header } from '@/components/ui/Header';
 import { showToast } from '@/components/ui/Toast';
-import { Pet } from '@/types/database';
+import { Pet, PetType } from '@/types/database';
 import { useAuth } from '@hooks/useAuth';
 import { petsService } from '@services/pets';
 import { useRouter } from 'expo-router';
@@ -17,7 +17,7 @@ export default function CreatePet() {
       if (!user?.id) return;
       await petsService.create({
         name: data.name,
-        type: data.type,
+        type: data.type as PetType,
         breed: data.breed,
         age: data.age,
         gender: data.gender,

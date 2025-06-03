@@ -1,8 +1,9 @@
-import { Pet } from '@/types/database';
+import { PetImage } from '@/components/PetImage';
+import { Pet, PetType } from '@/types/database';
 import { getPetGenderLabel, getPetSizeLabel, getPetTypeLabel } from '@/utils/pet';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface PetCardProps {
   pet: Pet;
@@ -19,17 +20,14 @@ export function PetCard({ pet, showActions = false, onEdit, onDelete }: PetCardP
       style={styles.petCard}
       onPress={() => router.push(`/pet/${pet.id}`)}
     >
-      <Image
-        source={pet.image ? { uri: pet.image } : require('@assets/images/default-dog.png')}
-        style={styles.petImage}
-      />
+      <PetImage pet={pet} style={styles.petImage} />
       <View style={styles.content}>
         <View style={styles.header}>
           <Text style={styles.name}>{pet.name}</Text>
           <View style={styles.badges}>
             <View style={styles.badge}>
               <Text style={styles.badgeText}>
-                {getPetTypeLabel(pet.type as 'DOG' | 'CAT')}
+                {getPetTypeLabel(pet.type as PetType)}
               </Text>
             </View>
             <View style={styles.badge}>
