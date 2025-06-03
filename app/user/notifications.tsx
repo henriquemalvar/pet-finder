@@ -1,8 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Header } from '@/components/ui/Header';
+import { Container } from '@/components/ui/Container';
 
 export default function Notifications() {
   const [emailNotifications, setEmailNotifications] = useState(true);
@@ -12,7 +12,7 @@ export default function Notifications() {
   const [updates, setUpdates] = useState(true);
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <Container edges={['top']}>
       <Header title="Notificações" showBackButton />
 
       <ScrollView style={styles.content}>
@@ -84,7 +84,7 @@ export default function Notifications() {
           </View>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </Container>
   );
 }
 

@@ -1,9 +1,18 @@
-import { useEffect } from 'react';
-import * as Notifications from 'expo-notifications';
-import * as Device from 'expo-device';
-import { Platform } from 'react-native';
-import { notificationsService } from '@services/notifications';
 import { showToast } from '@/components/ui/Toast';
+import { notificationsService } from '@services/notifications';
+import * as Device from 'expo-device';
+import * as Notifications from 'expo-notifications';
+import { useEffect } from 'react';
+import { Platform } from 'react-native';
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
 
 export function usePushNotifications(userId?: string) {
   useEffect(() => {
@@ -28,6 +37,10 @@ export function usePushNotifications(userId?: string) {
         }
 
         const tokenData = await Notifications.getExpoPushTokenAsync();
+        if (!tokenData) {
+          console.warn('Token de notificação não disponível');
+          return;
+        }
         const token = tokenData.data;
         await notificationsService.registerToken(token);
 
