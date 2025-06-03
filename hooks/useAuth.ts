@@ -1,9 +1,7 @@
 import { showToast } from '@/components/ui/Toast';
-import { getUser, removeUser, saveUser } from '@lib/auth';
-import { authService, User } from '@services/auth';
+import { UserWithToken } from '@/types/auth';
+import { authService, getUser, removeUser, saveUser } from '@services/auth';
 import { useCallback, useEffect, useState } from 'react';
-
-type UserWithToken = User & { token: string };
 
 export function useAuth() {
   const [user, setUser] = useState<UserWithToken | null>(null);
@@ -20,7 +18,7 @@ export function useAuth() {
       console.log('Usuário carregado:', storedUser);
       
       if (storedUser) {
-        setUser(storedUser as UserWithToken);
+        setUser(storedUser);
       }
     } catch (error) {
       console.error('Erro ao carregar usuário:', error);

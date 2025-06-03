@@ -1,24 +1,9 @@
+import { showToast } from '@/components/ui/Toast';
+import { AuthResponse, UserWithToken } from '@/types/auth';
 import api from '@lib/axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  avatar: string | null;
-  whatsapp: string | null;
-  instagram: string | null;
-  contactPreference: string | null;
-  address: string | null;
-  latitude: number | null;
-  longitude: number | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface LoginResponse {
-  user: User;
-  token: string;
-}
+const USER_KEY = '@pet-finder:user';
 
 export interface LoginCredentials {
   email: string;
@@ -31,17 +16,62 @@ export interface RegisterData {
   password: string;
 }
 
+// Funções de persistência
+export const getToken = async (): Promise<string | null> => {
+  try {
+    const user = await getUser();
+    return user?.token || null;
+  } catch (error) {
+    showToast.error('Erro', 'Erro ao obter token');
+    return null;
+  }
+};
+
+export const getUser = async (): Promise<UserWithToken | null> => {
+  try {
+    const userJson = await AsyncStorage.getItem(USER_KEY);
+    return userJson ? JSON.parse(userJson) : null;
+  } catch (error) {
+    showToast.error('Erro', 'Erro ao obter usuário');
+    return null;
+  }
+};
+
+export const saveUser = async (user: UserWithToken): Promise<void> => {
+  try {
+    await AsyncStorage.setItem(USER_KEY, JSON.stringify(user));
+  } catch (error) {
+    showToast.error('Erro', 'Erro ao salvar usuário');
+    throw error;
+  }
+};
+
+export const removeUser = async (): Promise<void> => {
+  try {
+    await AsyncStorage.removeItem(USER_KEY);
+    await AsyncStorage.removeItem('@token');
+  } catch (error) {
+    showToast.error('Erro', 'Erro ao remover usuário');
+    throw error;
+  }
+};
+
+export const isAuthenticated = async (): Promise<boolean> => {
+  try {
+    const user = await getUser();
+    return !!user;
+  } catch (error) {
+    showToast.error('Erro', 'Erro ao verificar autenticação');
+    return false;
+  }
+};
+
+// Serviço de autenticação
 export const authService = {
-  login: async (credentials: LoginCredentials): Promise<User & { token: string }> => {
-    console.log('Enviando requisição de login...');
-    const response = await api.post<LoginResponse>('/auth/login', {
-      email: credentials.email,
-      password: credentials.password,
-    });
-    console.log('Resposta da API:', response.data);
+  login: async (credentials: LoginCredentials): Promise<UserWithToken> => {
+    const response = await api.post<AuthResponse>('/auth/login', credentials);
 
     if (!response.data.user || !response.data.token) {
-      console.error('Dados incompletos:', response.data);
       throw new Error('Dados do usuário incompletos na resposta');
     }
 
@@ -51,12 +81,8 @@ export const authService = {
     };
   },
 
-  register: async (data: RegisterData): Promise<User & { token: string }> => {
-    const response = await api.post<LoginResponse>('/auth/register', {
-      name: data.name,
-      email: data.email,
-      password: data.password,
-    });
+  register: async (data: RegisterData): Promise<UserWithToken> => {
+    const response = await api.post<AuthResponse>('/auth/register', data);
 
     if (!response.data.user || !response.data.token) {
       throw new Error('Dados do usuário incompletos na resposta');
