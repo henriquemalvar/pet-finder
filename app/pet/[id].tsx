@@ -22,9 +22,16 @@ export default function PetDetails() {
   const loadPet = useCallback(async () => {
     try {
       if (!id) return;
+      console.log('Carregando pet com ID:', id);
       const data = await petsService.getById(id);
-      setPet(data as unknown as Pet);
+      console.log('Dados do pet recebidos:', data);
+      const petData = {
+        ...data,
+        type: data.type as PetType
+      };
+      setPet(petData);
     } catch (error) {
+      console.error('Erro ao carregar pet:', error);
       const errorMessage = error instanceof Error ? error.message : 'Erro ao carregar pet';
       showToast.error('Erro', errorMessage);
       router.back();
@@ -35,6 +42,7 @@ export default function PetDetails() {
 
   useEffect(() => {
     if (!id) {
+      console.log('ID não encontrado nos parâmetros');
       setError('ID do pet não encontrado');
       setLoading(false);
       return;
@@ -44,6 +52,7 @@ export default function PetDetails() {
   }, [id, loadPet]);
 
   if (loading) {
+    console.log('Renderizando loading...');
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
         <Header title="Detalhes do Pet" showBackButton />

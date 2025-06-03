@@ -1,18 +1,30 @@
-import { Pet, PetType } from '@/types/database';
+import { Pet } from '@/types/database';
+import { useMemo } from 'react';
 import { Image, ImageProps, StyleSheet } from 'react-native';
 
 interface PetImageProps extends Omit<ImageProps, 'source'> {
-  pet: Pet;
+  pet?: Pet;
 }
 
 export function PetImage({ pet, style, ...props }: PetImageProps) {
-  const defaultImage = pet.type === PetType.DOG 
-    ? require('@assets/images/default-dog.png')
-    : require('@assets/images/default-cat.png');
+  const defaultImage = require('@assets/images/default-dog.png');
+
+  const imageSource = useMemo(() => {
+    if (!pet) {
+      return defaultImage;
+    }
+
+    const isDog = String(pet.type).toUpperCase() === 'DOG';
+    const petImage = isDog
+      ? require('@assets/images/default-dog.png')
+      : require('@assets/images/default-cat.png');
+
+    return pet.image ? { uri: pet.image } : petImage;
+  }, [pet]);
 
   return (
     <Image
-      source={pet.image ? { uri: pet.image } : defaultImage}
+      source={imageSource}
       style={[styles.image, style]}
       {...props}
     />
