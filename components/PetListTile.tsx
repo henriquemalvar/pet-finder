@@ -1,4 +1,5 @@
 import { Pet } from '@/types/database';
+import { getPetGenderLabel, getPetSizeLabel, getPetTypeLabel } from '@/utils/pet';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
@@ -81,18 +82,18 @@ export function PetListTile({
             <View style={styles.badges}>
               <View style={styles.badge}>
                 <Text style={styles.badgeText}>
-                  {pet.type === 'DOG' ? 'Cachorro' : 'Gato'}
+                  {getPetTypeLabel(pet.type)}
                 </Text>
               </View>
               <View style={styles.badge}>
                 <Text style={styles.badgeText}>
-                  {pet.gender === 'MALE' ? 'Macho' : 'Fêmea'}
+                  {getPetGenderLabel(pet.gender)}
                 </Text>
               </View>
             </View>
           </View>
           <Text style={styles.details}>
-            {pet.breed} • {pet.age} • {pet.size === 'SMALL' ? 'Pequeno' : pet.size === 'MEDIUM' ? 'Médio' : 'Grande'}
+            {pet.breed} • {pet.age} • {getPetSizeLabel(pet.size)}
           </Text>
           <View style={styles.footer}>
             <View style={styles.status}>

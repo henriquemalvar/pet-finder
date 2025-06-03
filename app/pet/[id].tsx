@@ -1,6 +1,8 @@
 import { PetDetailsSkeleton } from '@/components/skeletons/PetDetailsSkeleton';
 import { Header } from '@/components/ui/Header';
 import { showToast } from '@/components/ui/Toast';
+import { PetGender, PetSize } from '@/types/database';
+import { getPetGenderLabel, getPetSizeLabel, getPetTypeLabel, PetType } from '@/utils/pet';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Pet, petsService } from '@services/pets';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -74,7 +76,7 @@ export default function PetDetails() {
           </TouchableOpacity>
           <View style={styles.typeBadge}>
             <MaterialCommunityIcons name="paw" size={16} color="#fff" />
-            <Text style={styles.typeBadgeText}>{pet.type === 'DOG' ? 'Cachorro' : pet.type === 'CAT' ? 'Gato' : pet.type}</Text>
+            <Text style={styles.typeBadgeText}>{getPetTypeLabel(pet.type as PetType)}</Text>
           </View>
         </View>
         <Text style={styles.petName}>{pet.name}</Text>
@@ -95,17 +97,17 @@ export default function PetDetails() {
           <View style={styles.infoCard}>
             <MaterialCommunityIcons name={pet.gender === 'MALE' ? 'gender-male' : 'gender-female'} size={22} color="#888" />
             <Text style={styles.infoLabel}>Gênero</Text>
-            <Text style={styles.infoValue}>{pet.gender === 'MALE' ? 'Macho' : 'Fêmea'}</Text>
+            <Text style={styles.infoValue}>{getPetGenderLabel(pet.gender as PetGender)}</Text>
           </View>
           <View style={styles.infoCard}>
             <MaterialCommunityIcons name="arrow-expand-vertical" size={22} color="#888" />
             <Text style={styles.infoLabel}>Porte</Text>
-            <Text style={styles.infoValue}>{pet.size}</Text>
+            <Text style={styles.infoValue}>{getPetSizeLabel(pet.size as PetSize)}</Text>
           </View>
           <View style={styles.infoCard}>
             <MaterialCommunityIcons name="map-marker" size={22} color="#888" />
             <Text style={styles.infoLabel}>Localização</Text>
-            <Text style={styles.infoValue}>{pet.location}</Text>
+            <Text style={styles.infoValue}>{pet.user?.address || 'Não informado'}</Text>
           </View>
         </View>
         <View style={styles.section}>
@@ -115,16 +117,16 @@ export default function PetDetails() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Contato</Text>
           <View style={styles.contactRow}>
-            {pet.whatsapp && (
+            {pet.user?.whatsapp && (
               <View style={styles.contactItem}>
                 <MaterialCommunityIcons name="whatsapp" size={22} color="#25D366" />
-                <Text style={styles.contactText}>{pet.whatsapp}</Text>
+                <Text style={styles.contactText}>{pet.user.whatsapp}</Text>
               </View>
             )}
-            {pet.instagram && (
+            {pet.user?.instagram && (
               <View style={styles.contactItem}>
                 <MaterialCommunityIcons name="instagram" size={22} color="#C13584" />
-                <Text style={styles.contactText}>{pet.instagram}</Text>
+                <Text style={styles.contactText}>{pet.user.instagram}</Text>
               </View>
             )}
           </View>

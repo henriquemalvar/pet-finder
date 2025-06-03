@@ -1,4 +1,5 @@
 import { Pet } from '@/types/database';
+import { getPetGenderLabel, getPetSizeLabel, getPetTypeLabel } from '@/utils/pet';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -28,19 +29,19 @@ export function PetCard({ pet, showActions = false, onEdit, onDelete }: PetCardP
           <View style={styles.badges}>
             <View style={styles.badge}>
               <Text style={styles.badgeText}>
-                {pet.type === 'DOG' ? 'Cachorro' : 'Gato'}
+                {getPetTypeLabel(pet.type as 'DOG' | 'CAT')}
               </Text>
             </View>
             <View style={styles.badge}>
               <Text style={styles.badgeText}>
-                {pet.gender === 'MALE' ? 'Macho' : 'Fêmea'}
+                {getPetGenderLabel(pet.gender)}
               </Text>
             </View>
           </View>
         </View>
         <Text style={styles.breed}>{pet.breed}</Text>
         <Text style={styles.details}>
-          {pet.age} • {pet.size === 'SMALL' ? 'Pequeno' : pet.size === 'MEDIUM' ? 'Médio' : 'Grande'}
+          {pet.age} • {getPetSizeLabel(pet.size)}
         </Text>
         <Text style={styles.location}>{pet.location}</Text>
         <View style={styles.status}>

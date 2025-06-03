@@ -1,6 +1,8 @@
-import { Pet } from '@/types/database';
+import { Pet, PetGender, PetSize } from '@/types/database';
+import { getPetGenderLabel, getPetSizeLabel, getPetTypeLabel } from '@/utils/pet';
 import { Ionicons } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
+import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { z } from 'zod';
@@ -10,8 +12,8 @@ const petSchema = z.object({
   type: z.enum(['DOG', 'CAT']),
   breed: z.string().min(1, 'Raça é obrigatória'),
   age: z.string().min(1, 'Idade é obrigatória'),
-  gender: z.enum(['MALE', 'FEMALE']),
-  size: z.enum(['SMALL', 'MEDIUM', 'LARGE']),
+  gender: z.nativeEnum(PetGender),
+  size: z.nativeEnum(PetSize),
   description: z.string().min(1, 'Descrição é obrigatória'),
   location: z.string().min(1, 'Localização é obrigatória'),
   castrated: z.boolean(),
@@ -31,11 +33,11 @@ export function PetForm({ initialData, onSubmit, submitLabel = 'Cadastrar' }: Pe
     resolver: zodResolver(petSchema),
     defaultValues: {
       name: initialData?.name || '',
-      type: initialData?.type || 'DOG',
+      type: (initialData?.type || 'DOG') as 'DOG' | 'CAT',
       breed: initialData?.breed || '',
       age: initialData?.age || '',
-      gender: initialData?.gender || 'MALE',
-      size: initialData?.size || 'MEDIUM',
+      gender: initialData?.gender || PetGender.MALE,
+      size: initialData?.size || PetSize.MEDIUM,
       description: initialData?.description || '',
       location: initialData?.location || '',
       castrated: initialData?.castrated || false,
@@ -44,7 +46,7 @@ export function PetForm({ initialData, onSubmit, submitLabel = 'Cadastrar' }: Pe
   });
 
   const handleFormSubmit = async (data: PetFormData) => {
-    await onSubmit(data);
+    await onSubmit(data as Omit<Pet, 'id' | 'createdAt' | 'updatedAt' | 'userId' | 'user' | 'posts'>);
   };
 
   return (
@@ -78,7 +80,7 @@ export function PetForm({ initialData, onSubmit, submitLabel = 'Cadastrar' }: Pe
               control={control}
               name="type"
               render={({ field: { onChange, value } }) => (
-                <>
+                <React.Fragment>
                   <TouchableOpacity
                     style={[
                       styles.typeButton,
@@ -95,7 +97,7 @@ export function PetForm({ initialData, onSubmit, submitLabel = 'Cadastrar' }: Pe
                       styles.typeButtonText,
                       value === 'DOG' && styles.typeButtonTextSelected
                     ]}>
-                      Cachorro
+                      {getPetTypeLabel('DOG')}
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
@@ -114,10 +116,10 @@ export function PetForm({ initialData, onSubmit, submitLabel = 'Cadastrar' }: Pe
                       styles.typeButtonText,
                       value === 'CAT' && styles.typeButtonTextSelected
                     ]}>
-                      Gato
+                      {getPetTypeLabel('CAT')}
                     </Text>
                   </TouchableOpacity>
-                </>
+                </React.Fragment>
               )}
             />
           </View>
@@ -172,46 +174,46 @@ export function PetForm({ initialData, onSubmit, submitLabel = 'Cadastrar' }: Pe
               control={control}
               name="gender"
               render={({ field: { onChange, value } }) => (
-                <>
+                <React.Fragment>
                   <TouchableOpacity
                     style={[
                       styles.typeButton,
-                      value === 'MALE' && styles.typeButtonSelected
+                      value === PetGender.MALE && styles.typeButtonSelected
                     ]}
-                    onPress={() => onChange('MALE')}
+                    onPress={() => onChange(PetGender.MALE)}
                   >
                     <Ionicons
                       name="male"
                       size={24}
-                      color={value === 'MALE' ? '#fff' : '#666'}
+                      color={value === PetGender.MALE ? '#fff' : '#666'}
                     />
                     <Text style={[
                       styles.typeButtonText,
-                      value === 'MALE' && styles.typeButtonTextSelected
+                      value === PetGender.MALE && styles.typeButtonTextSelected
                     ]}>
-                      Macho
+                      {getPetGenderLabel(PetGender.MALE)}
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[
                       styles.typeButton,
-                      value === 'FEMALE' && styles.typeButtonSelected
+                      value === PetGender.FEMALE && styles.typeButtonSelected
                     ]}
-                    onPress={() => onChange('FEMALE')}
+                    onPress={() => onChange(PetGender.FEMALE)}
                   >
                     <Ionicons
                       name="female"
                       size={24}
-                      color={value === 'FEMALE' ? '#fff' : '#666'}
+                      color={value === PetGender.FEMALE ? '#fff' : '#666'}
                     />
                     <Text style={[
                       styles.typeButtonText,
-                      value === 'FEMALE' && styles.typeButtonTextSelected
+                      value === PetGender.FEMALE && styles.typeButtonTextSelected
                     ]}>
-                      Fêmea
+                      {getPetGenderLabel(PetGender.FEMALE)}
                     </Text>
                   </TouchableOpacity>
-                </>
+                </React.Fragment>
               )}
             />
           </View>
@@ -224,50 +226,50 @@ export function PetForm({ initialData, onSubmit, submitLabel = 'Cadastrar' }: Pe
               control={control}
               name="size"
               render={({ field: { onChange, value } }) => (
-                <>
+                <React.Fragment>
                   <TouchableOpacity
                     style={[
                       styles.typeButton,
-                      value === 'SMALL' && styles.typeButtonSelected
+                      value === PetSize.SMALL && styles.typeButtonSelected
                     ]}
-                    onPress={() => onChange('SMALL')}
+                    onPress={() => onChange(PetSize.SMALL)}
                   >
                     <Text style={[
                       styles.typeButtonText,
-                      value === 'SMALL' && styles.typeButtonTextSelected
+                      value === PetSize.SMALL && styles.typeButtonTextSelected
                     ]}>
-                      Pequeno
+                      {getPetSizeLabel(PetSize.SMALL)}
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[
                       styles.typeButton,
-                      value === 'MEDIUM' && styles.typeButtonSelected
+                      value === PetSize.MEDIUM && styles.typeButtonSelected
                     ]}
-                    onPress={() => onChange('MEDIUM')}
+                    onPress={() => onChange(PetSize.MEDIUM)}
                   >
                     <Text style={[
                       styles.typeButtonText,
-                      value === 'MEDIUM' && styles.typeButtonTextSelected
+                      value === PetSize.MEDIUM && styles.typeButtonTextSelected
                     ]}>
-                      Médio
+                      {getPetSizeLabel(PetSize.MEDIUM)}
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[
                       styles.typeButton,
-                      value === 'LARGE' && styles.typeButtonSelected
+                      value === PetSize.LARGE && styles.typeButtonSelected
                     ]}
-                    onPress={() => onChange('LARGE')}
+                    onPress={() => onChange(PetSize.LARGE)}
                   >
                     <Text style={[
                       styles.typeButtonText,
-                      value === 'LARGE' && styles.typeButtonTextSelected
+                      value === PetSize.LARGE && styles.typeButtonTextSelected
                     ]}>
-                      Grande
+                      {getPetSizeLabel(PetSize.LARGE)}
                     </Text>
                   </TouchableOpacity>
-                </>
+                </React.Fragment>
               )}
             />
           </View>
