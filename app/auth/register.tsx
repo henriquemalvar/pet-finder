@@ -1,21 +1,45 @@
 import { showToast } from '@/components/ui/Toast';
 import { Logo } from '@components/Logo';
+import { Ionicons } from '@expo/vector-icons';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '@hooks/useAuth';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { z } from 'zod';
+
+const registerSchema = z.object({
+  name: z.string().min(1, 'Nome é obrigatório'),
+  email: z.string().email('E-mail inválido'),
+  password: z.string().min(6, 'A senha deve ter no mínimo 6 caracteres'),
+  confirmPassword: z.string().min(6, 'A senha deve ter no mínimo 6 caracteres'),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: 'As senhas não conferem',
+  path: ['confirmPassword'],
+});
+
+type RegisterFormData = z.infer<typeof registerSchema>;
 
 export default function Register() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const { register } = useAuth();
   const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const handleRegister = async () => {
+  const { control, handleSubmit, formState: { errors, isSubmitting } } = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      name: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+    },
+  });
+
+  const onSubmit = async (data: RegisterFormData) => {
     try {
-      await register(name, email, password);
+      await register(data.name, data.email, data.password);
       router.replace('/(tabs)');
     } catch {
       showToast.error('Erro', 'Erro ao registrar');
@@ -34,55 +58,121 @@ export default function Register() {
         <View style={styles.form}>
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Nome completo</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Seu nome"
-              placeholderTextColor="#666"
-              value={name}
-              onChangeText={setName}
-              autoCapitalize="words"
+            <Controller
+              control={control}
+              name="name"
+              render={({ field: { onChange, value } }) => (
+                <TextInput
+                  style={styles.input}
+                  placeholder="Seu nome"
+                  placeholderTextColor="#666"
+                  value={value}
+                  onChangeText={onChange}
+                  autoCapitalize="words"
+                />
+              )}
             />
+            {errors.name && (
+              <Text style={styles.errorText}>{errors.name.message}</Text>
+            )}
           </View>
 
           <View style={styles.inputContainer}>
             <Text style={styles.label}>E-mail</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Seu e-mail"
-              placeholderTextColor="#666"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
+            <Controller
+              control={control}
+              name="email"
+              render={({ field: { onChange, value } }) => (
+                <TextInput
+                  style={styles.input}
+                  placeholder="Seu e-mail"
+                  placeholderTextColor="#666"
+                  value={value}
+                  onChangeText={onChange}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+              )}
             />
+            {errors.email && (
+              <Text style={styles.errorText}>{errors.email.message}</Text>
+            )}
           </View>
 
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Senha</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Sua senha"
-              placeholderTextColor="#666"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-            />
+            <View style={styles.passwordContainer}>
+              <Controller
+                control={control}
+                name="password"
+                render={({ field: { onChange, value } }) => (
+                  <TextInput
+                    style={[styles.input, styles.passwordInput]}
+                    placeholder="Sua senha"
+                    placeholderTextColor="#666"
+                    value={value}
+                    onChangeText={onChange}
+                    secureTextEntry={!showPassword}
+                  />
+                )}
+              />
+              <TouchableOpacity
+                style={styles.eyeIcon}
+                onPress={() => setShowPassword(!showPassword)}
+              >
+                <Ionicons
+                  name={showPassword ? 'eye-off' : 'eye'}
+                  size={24}
+                  color="#666"
+                />
+              </TouchableOpacity>
+            </View>
+            {errors.password && (
+              <Text style={styles.errorText}>{errors.password.message}</Text>
+            )}
           </View>
 
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Confirmar senha</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Confirme sua senha"
-              placeholderTextColor="#666"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              secureTextEntry
-            />
+            <View style={styles.passwordContainer}>
+              <Controller
+                control={control}
+                name="confirmPassword"
+                render={({ field: { onChange, value } }) => (
+                  <TextInput
+                    style={[styles.input, styles.passwordInput]}
+                    placeholder="Confirme sua senha"
+                    placeholderTextColor="#666"
+                    value={value}
+                    onChangeText={onChange}
+                    secureTextEntry={!showConfirmPassword}
+                  />
+                )}
+              />
+              <TouchableOpacity
+                style={styles.eyeIcon}
+                onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+              >
+                <Ionicons
+                  name={showConfirmPassword ? 'eye-off' : 'eye'}
+                  size={24}
+                  color="#666"
+                />
+              </TouchableOpacity>
+            </View>
+            {errors.confirmPassword && (
+              <Text style={styles.errorText}>{errors.confirmPassword.message}</Text>
+            )}
           </View>
 
-          <TouchableOpacity style={styles.button} onPress={handleRegister}>
-            <Text style={styles.buttonText}>Criar Conta</Text>
+          <TouchableOpacity 
+            style={[styles.button, isSubmitting && styles.buttonDisabled]} 
+            onPress={handleSubmit(onSubmit)}
+            disabled={isSubmitting}
+          >
+            <Text style={styles.buttonText}>
+              {isSubmitting ? 'Criando conta...' : 'Criar Conta'}
+            </Text>
           </TouchableOpacity>
 
           <View style={styles.footer}>
@@ -146,6 +236,22 @@ const styles = StyleSheet.create({
     color: '#1a1a1a',
     backgroundColor: '#f8f9fa',
   },
+  passwordContainer: {
+    position: 'relative',
+  },
+  passwordInput: {
+    paddingRight: 48,
+  },
+  eyeIcon: {
+    position: 'absolute',
+    right: 16,
+    top: '50%',
+    transform: [{ translateY: -12 }],
+  },
+  errorText: {
+    color: '#FF3B30',
+    fontSize: 14,
+  },
   button: {
     backgroundColor: '#007AFF',
     padding: 16,
@@ -160,6 +266,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 5,
+  },
+  buttonDisabled: {
+    opacity: 0.7,
   },
   buttonText: {
     color: '#fff',

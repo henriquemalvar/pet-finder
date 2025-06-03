@@ -1,10 +1,12 @@
 import { showToast } from '@/components/ui/Toast';
 import { Logo } from '@components/Logo';
+import { Ionicons } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '@hooks/useAuth';
 import { router } from 'expo-router';
+import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { ActivityIndicator, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { z } from 'zod';
 
 const loginSchema = z.object({
@@ -20,6 +22,8 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function Login() {
   const { login } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
+
   const { control, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -38,7 +42,10 @@ export default function Login() {
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+    >
       <View style={styles.header}>
         <Logo size="medium" />
         <Text style={styles.title}>Bem-vindo de volta!</Text>
@@ -70,20 +77,32 @@ export default function Login() {
 
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Senha</Text>
-          <Controller
-            control={control}
-            name="password"
-            render={({ field: { onChange, value } }) => (
-              <TextInput
-                style={[styles.input, errors.password && styles.inputError]}
-                placeholder="Sua senha"
-                placeholderTextColor="#666"
-                value={value}
-                onChangeText={onChange}
-                secureTextEntry
+          <View style={styles.passwordContainer}>
+            <Controller
+              control={control}
+              name="password"
+              render={({ field: { onChange, value } }) => (
+                <TextInput
+                  style={[styles.input, styles.passwordInput, errors.password && styles.inputError]}
+                  placeholder="Sua senha"
+                  placeholderTextColor="#666"
+                  value={value}
+                  onChangeText={onChange}
+                  secureTextEntry={!showPassword}
+                />
+              )}
+            />
+            <TouchableOpacity
+              style={styles.eyeIcon}
+              onPress={() => setShowPassword(!showPassword)}
+            >
+              <Ionicons
+                name={showPassword ? 'eye-off' : 'eye'}
+                size={24}
+                color="#666"
               />
-            )}
-          />
+            </TouchableOpacity>
+          </View>
           {errors.password && (
             <Text style={styles.errorText}>{errors.password.message}</Text>
           )}
@@ -108,7 +127,7 @@ export default function Login() {
           </TouchableOpacity>
         </View>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -155,6 +174,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#1a1a1a',
     backgroundColor: '#f8f9fa',
+  },
+  passwordContainer: {
+    position: 'relative',
+  },
+  passwordInput: {
+    paddingRight: 48,
+  },
+  eyeIcon: {
+    position: 'absolute',
+    right: 16,
+    top: '50%',
+    transform: [{ translateY: -12 }],
   },
   inputError: {
     borderColor: '#FF3B30',

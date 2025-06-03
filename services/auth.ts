@@ -8,6 +8,9 @@ export interface User {
   whatsapp: string | null;
   instagram: string | null;
   contactPreference: string | null;
+  address: string | null;
+  latitude: number | null;
+  longitude: number | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -30,12 +33,15 @@ export interface RegisterData {
 
 export const authService = {
   login: async (credentials: LoginCredentials): Promise<User & { token: string }> => {
+    console.log('Enviando requisição de login...');
     const response = await api.post<LoginResponse>('/auth/login', {
       email: credentials.email,
       password: credentials.password,
     });
+    console.log('Resposta da API:', response.data);
 
     if (!response.data.user || !response.data.token) {
+      console.error('Dados incompletos:', response.data);
       throw new Error('Dados do usuário incompletos na resposta');
     }
 
