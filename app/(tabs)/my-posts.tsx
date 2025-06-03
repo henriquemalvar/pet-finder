@@ -1,7 +1,7 @@
 import { PostCardSkeleton } from '@/components/skeletons/PostCardSkeleton';
 import { ConfirmDeleteModal } from '@/components/ui/ConfirmDeleteModal';
-import { EmptyState } from '@/components/ui/EmptyState';
 import { Header } from '@/components/ui/Header';
+import { ListState } from '@/components/ui/ListState';
 import { showToast } from '@/components/ui/Toast';
 import { PostCard } from '@components/PostCard';
 import { useAuth } from '@hooks/useAuth';
@@ -105,9 +105,10 @@ export default function MyPosts() {
             <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
           }
           ListEmptyComponent={
-            <EmptyState 
+            <ListState 
               type="error" 
               message="Não foi possível carregar seus posts. Tente novamente mais tarde."
+              onRetry={loadPosts}
             />
           }
         />
@@ -147,7 +148,7 @@ export default function MyPosts() {
         }
         ListEmptyComponent={
           !loading && posts.length === 0 ? (
-            <EmptyState 
+            <ListState 
               type="empty" 
               message="Você ainda não tem posts. Clique no botão + para criar um novo post."
             />

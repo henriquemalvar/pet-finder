@@ -1,4 +1,4 @@
-import { theme } from '@/theme';
+import { lightTheme } from '@/theme';
 import Toast, { toastConfig } from '@components/ui/Toast';
 import { ThemeProvider } from '@contexts/ThemeContext';
 import { Stack } from 'expo-router';
@@ -7,7 +7,7 @@ import { PaperProvider } from 'react-native-paper';
 
 export default function RootLayout() {
   return (
-    <PaperProvider theme={theme}>
+    <PaperProvider theme={lightTheme}>
       <ThemeProvider>
         <Stack
           screenOptions={{
@@ -35,6 +35,7 @@ export default function RootLayout() {
           <Stack.Screen name="pet/create" options={{ headerShown: false }} />
           <Stack.Screen name="pet/edit/[id]" options={{ headerShown: false }} />
 
+          <Stack.Screen name="search" options={{ headerShown: false }} />
         </Stack>
         <Toast config={toastConfig} />
       </ThemeProvider>

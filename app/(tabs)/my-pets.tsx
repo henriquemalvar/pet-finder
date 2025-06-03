@@ -1,7 +1,7 @@
 import { PetCardSkeleton } from '@/components/skeletons/PetCardSkeleton';
 import { ConfirmDeleteModal } from '@/components/ui/ConfirmDeleteModal';
-import { EmptyState } from '@/components/ui/EmptyState';
 import { Header } from '@/components/ui/Header';
+import { ListState } from '@/components/ui/ListState';
 import { showToast } from '@/components/ui/Toast';
 import { Pet } from '@/types/database';
 import { PetCard } from '@components/PetCard';
@@ -101,9 +101,10 @@ export default function MyPets() {
             <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
           }
           ListEmptyComponent={
-            <EmptyState 
+            <ListState 
               type="error" 
               message="Não foi possível carregar seus pets. Tente novamente mais tarde."
+              onRetry={loadPets}
             />
           }
         />
@@ -156,7 +157,7 @@ export default function MyPets() {
         }
         ListEmptyComponent={
           !loading && pets.length === 0 ? (
-            <EmptyState 
+            <ListState 
               type="empty" 
               message="Você ainda não tem pets cadastrados. Clique no botão + para adicionar um novo pet."
             />
