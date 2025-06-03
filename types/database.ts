@@ -9,6 +9,11 @@ export enum PetSize {
   LARGE = 'LARGE'
 }
 
+export enum PetType {
+  DOG = 'DOG',
+  CAT = 'CAT'
+}
+
 export enum PostType {
   LOST = 'LOST',
   FOUND = 'FOUND',
@@ -19,6 +24,13 @@ export enum PostStatus {
   ACTIVE = 'ACTIVE',
   RESOLVED = 'RESOLVED',
   CANCELED = 'CANCELED'
+}
+
+export enum PetAge {
+  PUPPY = 'PUPPY',
+  YOUNG = 'YOUNG',
+  ADULT = 'ADULT',
+  SENIOR = 'SENIOR'
 }
 
 export type User = {
