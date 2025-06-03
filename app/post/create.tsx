@@ -4,25 +4,31 @@ import { PostEditSkeleton } from '@/components/skeletons/PostEditSkeleton';
 import { Header } from '@/components/ui/Header';
 import { showToast } from '@/components/ui/Toast';
 import { Pet, PostType } from '@/types/database';
+import { ESTADOS } from '@/utils/estados';
 import { Ionicons } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '@hooks/useAuth';
 import { petsService } from '@services/pets';
 import { postsService } from '@services/posts';
+import * as Location from 'expo-location';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { KeyboardAvoidingView, Platform, RefreshControl, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, RefreshControl, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { z } from 'zod';
 
 const postSchema = z.object({
   petId: z.string().min(1, 'Selecione um pet ou crie um novo'),
   type: z.nativeEnum(PostType),
-  location: z.string().min(1, 'Localização é obrigatória'),
+  district: z.string().min(1, 'Bairro é obrigatório'),
+  city: z.string().min(1, 'Cidade é obrigatória'),
+  state: z.string().min(1, 'Estado é obrigatório'),
   title: z.string().min(1, 'Título é obrigatório'),
   description: z.string().min(1, 'Descrição é obrigatória'),
   contact: z.string().min(1, 'Contato é obrigatório'),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
 });
 
 type PostFormData = z.infer<typeof postSchema>;
@@ -40,16 +46,22 @@ export default function CreatePost() {
   const [refreshing, setRefreshing] = useState(false);
   const [pets, setPets] = useState<Pet[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [loadingLocation, setLoadingLocation] = useState(false);
+  const [showStateModal, setShowStateModal] = useState(false);
 
-  const { control, handleSubmit, formState: { errors } } = useForm<PostFormData>({
+  const { control, handleSubmit, formState: { errors }, setValue } = useForm<PostFormData>({
     resolver: zodResolver(postSchema),
     defaultValues: {
       petId: '',
       type: PostType.ADOPTION,
-      location: '',
+      district: '',
+      city: '',
+      state: '',
       title: '',
       description: '',
       contact: '',
+      latitude: undefined,
+      longitude: undefined,
     }
   });
 
@@ -80,6 +92,45 @@ export default function CreatePost() {
     }
   }, [user?.id]);
 
+  const getCurrentLocation = useCallback(async () => {
+    try {
+      setLoadingLocation(true);
+      
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        showToast.error('Erro', 'Permissão de localização negada');
+        return;
+      }
+
+      const location = await Location.getCurrentPositionAsync({});
+      const { latitude, longitude } = location.coords;
+
+      const [address] = await Location.reverseGeocodeAsync({
+        latitude,
+        longitude
+      });
+
+      if (address) {
+        setValue('district', address.district || '');
+        setValue('city', address.city || '');
+        
+        // Encontrar a sigla do estado pelo nome
+        const estado = ESTADOS.find(e => 
+          e.nome.toLowerCase() === address.region?.toLowerCase()
+        );
+        setValue('state', estado?.sigla || '');
+
+        // Salvar as coordenadas
+        setValue('latitude', latitude);
+        setValue('longitude', longitude);
+      }
+    } catch (error) {
+      showToast.error('Erro', 'Não foi possível obter sua localização');
+    } finally {
+      setLoadingLocation(false);
+    }
+  }, [setValue]);
+
   useEffect(() => {
     if (user?.id) {
       loadPets();
@@ -93,13 +144,17 @@ export default function CreatePost() {
   const onSubmit = async (data: PostFormData) => {
     try {
       setLoading(true);
+      const location = `${data.district}, ${data.city}, ${data.state}`;
       await postsService.create({
         petId: data.petId,
         type: data.type,
-        location: data.location,
+        location,
         title: data.title,
+        content: data.description,
         description: data.description,
         contact: data.contact,
+        latitude: data.latitude,
+        longitude: data.longitude,
       });
       showToast.success('Sucesso', 'Post criado com sucesso');
       router.back();
@@ -305,22 +360,88 @@ export default function CreatePost() {
 
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Localização</Text>
-              <Controller
-                control={control}
-                name="location"
-                render={({ field: { onChange, value } }) => (
-                  <TextInput
-                    style={[styles.input, errors.location && styles.inputError]}
-                    value={value}
-                    onChangeText={onChange}
-                    placeholder="Cidade, Estado"
-                    placeholderTextColor="#999"
-                  />
-                )}
-              />
-              {errors.location && (
-                <Text style={styles.errorText}>{errors.location.message}</Text>
-              )}
+              <View style={styles.locationContainer}>
+                <TouchableOpacity
+                  style={[styles.locationButton, loadingLocation && styles.locationButtonDisabled]}
+                  onPress={getCurrentLocation}
+                  disabled={loadingLocation}
+                >
+                  {loadingLocation ? (
+                    <ActivityIndicator size="small" color="#fff" />
+                  ) : (
+                    <Ionicons name="location" size={24} color="#fff" />
+                  )}
+                </TouchableOpacity>
+                <Text style={styles.locationButtonText}>Usar minha localização</Text>
+              </View>
+
+              <View style={styles.addressContainer}>
+                <View style={styles.addressRow}>
+                  <View style={[styles.addressField, { flex: 2 }]}>
+                    <Text style={styles.label}>Bairro</Text>
+                    <Controller
+                      control={control}
+                      name="district"
+                      render={({ field: { onChange, value } }) => (
+                        <TextInput
+                          style={[styles.input, errors.district && styles.inputError]}
+                          value={value}
+                          onChangeText={onChange}
+                          placeholder="Bairro"
+                          placeholderTextColor="#999"
+                        />
+                      )}
+                    />
+                    {errors.district && (
+                      <Text style={styles.errorText}>{errors.district.message}</Text>
+                    )}
+                  </View>
+
+                  <View style={[styles.addressField, { flex: 2 }]}>
+                    <Text style={styles.label}>Cidade</Text>
+                    <Controller
+                      control={control}
+                      name="city"
+                      render={({ field: { onChange, value } }) => (
+                        <TextInput
+                          style={[styles.input, errors.city && styles.inputError]}
+                          value={value}
+                          onChangeText={onChange}
+                          placeholder="Cidade"
+                          placeholderTextColor="#999"
+                        />
+                      )}
+                    />
+                    {errors.city && (
+                      <Text style={styles.errorText}>{errors.city.message}</Text>
+                    )}
+                  </View>
+
+                  <View style={[styles.addressField, { flex: 1 }]}>
+                    <Text style={styles.label}>Estado</Text>
+                    <Controller
+                      control={control}
+                      name="state"
+                      render={({ field: { onChange, value } }) => (
+                        <View style={styles.selectContainer}>
+                          <TouchableOpacity
+                            style={[styles.select, errors.state && styles.inputError]}
+                            onPress={() => setShowStateModal(true)}
+                          >
+                            <Text style={[styles.selectText, !value && styles.selectPlaceholder]}>
+                              {value || 'UF'}
+                            </Text>
+                            <Ionicons name="chevron-down" size={20} color="#666" />
+                          </TouchableOpacity>
+                        </View>
+                      )}
+                    />
+                    {errors.state && (
+                      <Text style={styles.errorText}>{errors.state.message}</Text>
+                    )}
+                  </View>
+                </View>
+              </View>
             </View>
 
             <View style={styles.inputContainer}>
@@ -355,6 +476,45 @@ export default function CreatePost() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* Modal de seleção de estado */}
+      <Modal
+        visible={showStateModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowStateModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Selecione o Estado</Text>
+              <TouchableOpacity
+                onPress={() => setShowStateModal(false)}
+                style={styles.modalCloseButton}
+              >
+                <Ionicons name="close" size={24} color="#666" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.modalList}>
+              {ESTADOS.map((estado) => (
+                <TouchableOpacity
+                  key={estado.sigla}
+                  style={styles.modalItem}
+                  onPress={() => {
+                    setValue('state', estado.sigla);
+                    setShowStateModal(false);
+                  }}
+                >
+                  <Text style={styles.modalItemText}>
+                    {estado.sigla} - {estado.nome}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -510,5 +670,96 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 14,
     fontWeight: '600',
+  },
+  locationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 16,
+  },
+  locationButton: {
+    backgroundColor: '#007AFF',
+    width: 48,
+    height: 48,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  locationButtonDisabled: {
+    opacity: 0.7,
+  },
+  locationButtonText: {
+    color: '#007AFF',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  addressContainer: {
+    gap: 16,
+  },
+  addressRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  addressField: {
+    gap: 8,
+  },
+  selectContainer: {
+    position: 'relative',
+  },
+  select: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  selectText: {
+    fontSize: 16,
+    color: '#1a1a1a',
+  },
+  selectPlaceholder: {
+    color: '#999',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    maxHeight: '80%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1a1a1a',
+  },
+  modalCloseButton: {
+    padding: 4,
+  },
+  modalList: {
+    padding: 16,
+  },
+  modalItem: {
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  modalItemText: {
+    fontSize: 16,
+    color: '#1a1a1a',
   },
 }); 

@@ -1,61 +1,62 @@
+import { Post } from '@/types/database';
 import api from '@lib/axios';
 
-export interface Post {
-  id: string;
-  title: string;
-  content: string;
-  petId: string;
-  userId: string;
-  type: 'ADOPTION' | 'LOST' | 'FOUND';
-  location: string;
-  status: 'ACTIVE' | 'INACTIVE';
-  createdAt: string;
-  updatedAt: string;
-  pet: {
-    id: string;
-    name: string;
-    type: string;
-    breed: string;
-    age: string;
-    gender: string;
-    size: string;
-    image: string | null;
-    description: string;
-    castrated: boolean;
-    vaccinated: boolean;
-    location: string;
-    createdAt: string;
-    updatedAt: string;
-    userId: string;
-  };
-  user: {
-    id: string;
-    name: string;
-    avatar: string | null;
-    whatsapp: string | null;
-    instagram: string | null;
-    contactPreference: string | null;
-  };
-}
+export type PostFilters = {
+  type?: 'LOST' | 'FOUND' | 'ADOPTION';
+  status?: 'ACTIVE' | 'RESOLVED' | 'CANCELED';
+  location?: string;
+  petType?: string;
+  petGender?: 'MALE' | 'FEMALE';
+  petSize?: 'SMALL' | 'MEDIUM' | 'LARGE';
+  userId?: string;
+  search?: string;
+  page?: number;
+  limit?: number;
+};
 
-interface CreatePostData {
+export type PostsResponse = {
+  posts: Post[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+};
+
+export type CreatePostData = {
   title: string;
   content: string;
   petId: string;
   type: 'ADOPTION' | 'LOST' | 'FOUND';
   location: string;
-}
+  description: string;
+  contact: string;
+  latitude?: number;
+  longitude?: number;
+};
 
-interface UpdatePostData {
+export type UpdatePostData = {
   type?: 'ADOPTION' | 'LOST' | 'FOUND';
   location?: string;
-  status?: 'ACTIVE' | 'INACTIVE';
-}
+  status?: 'ACTIVE' | 'RESOLVED' | 'CANCELED';
+};
 
 export const postsService = {
-  async list(): Promise<Post[]> {
+  async list(filters?: PostFilters): Promise<PostsResponse> {
     try {
-      const response = await api.get<Post[]>('/posts');
+      const response = await api.get<PostsResponse>('/posts', {
+        params: {
+          page: filters?.page || 1,
+          limit: filters?.limit || 10,
+          type: filters?.type,
+          status: filters?.status,
+          location: filters?.location,
+          petType: filters?.petType,
+          petGender: filters?.petGender,
+          petSize: filters?.petSize,
+          userId: filters?.userId,
+          search: filters?.search,
+        },
+      });
       return response.data;
     } catch (error) {
       throw error;

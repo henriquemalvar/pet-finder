@@ -3,6 +3,7 @@ import { Header } from '@/components/ui/Header';
 import { ImageHeader } from '@/components/ui/ImageHeader';
 import { InfoGrid } from '@/components/ui/InfoGrid';
 import { showToast } from '@/components/ui/Toast';
+import { getPetGenderLabel, getPetSizeLabel, getPetTypeLabel, getPostTypeLabel } from '@/utils/pet';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Post, postsService } from '@services/posts';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -62,19 +63,6 @@ export default function PostDetails() {
     );
   }
 
-  const getTypeText = (type: string) => {
-    switch (type) {
-      case 'ADOPTION':
-        return 'Adoção';
-      case 'LOST':
-        return 'Perdido';
-      case 'FOUND':
-        return 'Encontrado';
-      default:
-        return type;
-    }
-  };
-
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <Header title="Detalhes do Post" showBackButton />
@@ -82,21 +70,21 @@ export default function PostDetails() {
         <ImageHeader
           imageUrl={post.pet.image}
           onClose={() => router.back()}
-          badgeText={getTypeText(post.type)}
+          badgeText={getPostTypeLabel(post.type)}
           badgeIcon="paw"
           badgeColor="#3CB371"
         />
         <Text style={styles.postTitle}>{post.title}</Text>
         <Text style={styles.petName}>{post.pet.name}</Text>
         <View style={styles.headerRow}>
-          <View style={styles.badge}><Text style={styles.badgeText}>{post.pet.type === 'DOG' ? 'Cachorro' : post.pet.type === 'CAT' ? 'Gato' : post.pet.type}</Text></View>
+          <View style={styles.badge}><Text style={styles.badgeText}>{getPetTypeLabel(post.pet.type)}</Text></View>
         </View>
         <InfoGrid
           items={[
             { icon: 'paw', label: 'Raça', value: post.pet.breed },
             { icon: 'calendar', label: 'Idade', value: `${post.pet.age} anos` },
-            { icon: post.pet.gender === 'MALE' ? 'gender-male' : 'gender-female', label: 'Gênero', value: post.pet.gender === 'MALE' ? 'Macho' : 'Fêmea' },
-            { icon: 'arrow-expand-vertical', label: 'Porte', value: post.pet.size },
+            { icon: post.pet.gender === 'MALE' ? 'gender-male' : 'gender-female', label: 'Gênero', value: getPetGenderLabel(post.pet.gender) },
+            { icon: 'arrow-expand-vertical', label: 'Porte', value: getPetSizeLabel(post.pet.size) },
             { icon: 'map-marker', label: 'Localização', value: post.location },
           ]}
         />
