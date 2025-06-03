@@ -1,11 +1,16 @@
 import { lightTheme } from '@/theme';
 import Toast, { toastConfig } from '@components/ui/Toast';
 import { ThemeProvider } from '@contexts/ThemeContext';
+import { useAuth } from '@hooks/useAuth';
+import { usePushNotifications } from '@hooks/usePushNotifications';
 import { Stack } from 'expo-router';
 import React from 'react';
 import { PaperProvider } from 'react-native-paper';
 
 export default function RootLayout() {
+  const { user } = useAuth();
+  usePushNotifications(user?.id);
+
   return (
     <PaperProvider theme={lightTheme}>
       <ThemeProvider>
