@@ -21,19 +21,35 @@ export enum PostStatus {
   CANCELED = 'CANCELED'
 }
 
-export interface User {
+export type User = {
   id: string;
   name: string;
   email: string;
-  password: string;
   avatar?: string;
   whatsapp?: string;
   instagram?: string;
   contactPreference?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  address?: string;
+  latitude?: number;
+  longitude?: number;
+  createdAt: string;
+  updatedAt: string;
+  password: string;
   pets: Pet[];
   posts: Post[];
+}
+
+export interface UpdateUserDTO {
+  name?: string;
+  email?: string;
+  password?: string;
+  avatar?: string;
+  whatsapp?: string;
+  instagram?: string;
+  contactPreference?: string;
+  address?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 export interface Pet {

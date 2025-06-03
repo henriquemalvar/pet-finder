@@ -1,3 +1,4 @@
+import { User } from '@/types/database';
 import api from '@lib/axios';
 
 export interface Pet {
@@ -13,6 +14,7 @@ export interface Pet {
   userId: string;
   createdAt: string;
   updatedAt: string;
+  user?: User;
 }
 
 export interface CreatePetData {
