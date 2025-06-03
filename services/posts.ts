@@ -1,5 +1,6 @@
 import { Post } from '@/types/database';
 import api from '@lib/axios';
+import { notificationsService } from './notifications';
 
 export type PostFilters = {
   type?: 'LOST' | 'FOUND' | 'ADOPTION';
@@ -75,7 +76,15 @@ export const postsService = {
   async create(data: CreatePostData): Promise<Post> {
     try {
       const response = await api.post<Post>('/posts', data);
-      return response.data;
+      const post = response.data;
+
+      if (post.type === 'LOST' || post.type === 'FOUND') {
+        notificationsService.notifyNearbyUsers(post.id).catch(err => {
+          console.warn('Falha ao enviar notificação', err);
+        });
+      }
+
+      return post;
     } catch (error) {
       throw error;
     }
