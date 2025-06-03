@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Link, router } from 'expo-router';
-import { StyleSheet, Text, TouchableOpacity, View, ViewStyle } from 'react-native';
+import { StyleSheet, Text, TextStyle, TouchableOpacity, View, ViewStyle } from 'react-native';
 
 type RoutePath = '/post/create' | '/pet/create';
 
@@ -9,15 +9,19 @@ interface HeaderProps {
   showAddButton?: boolean;
   addButtonLink?: RoutePath;
   showBackButton?: boolean;
+  showFilterButton?: boolean;
+  onFilterPress?: () => void;
   onBackPress?: () => void;
   rightComponent?: React.ReactNode;
   transparent?: boolean;
   style?: ViewStyle;
-  titleStyle?: ViewStyle;
+  titleStyle?: TextStyle;
   showBorder?: boolean;
   backgroundColor?: string;
   titleColor?: string;
   iconColor?: string;
+  hasActiveFilters?: boolean;
+  onClearFilters?: () => void;
 }
 
 export function Header({
@@ -25,6 +29,8 @@ export function Header({
   showAddButton = false,
   addButtonLink,
   showBackButton = false,
+  showFilterButton = false,
+  onFilterPress,
   onBackPress,
   rightComponent,
   transparent = false,
@@ -34,6 +40,8 @@ export function Header({
   backgroundColor = '#fff',
   titleColor = '#1a1a1a',
   iconColor = '#1a1a1a',
+  hasActiveFilters = false,
+  onClearFilters,
 }: HeaderProps) {
   const handleBackPress = () => {
     if (onBackPress) {
@@ -77,6 +85,31 @@ export function Header({
 
         <View style={styles.rightContainer}>
           {rightComponent}
+          {hasActiveFilters && onClearFilters && (
+            <TouchableOpacity 
+              style={styles.clearFiltersButton}
+              onPress={onClearFilters}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <Ionicons name="close-circle" size={24} color={iconColor} />
+            </TouchableOpacity>
+          )}
+          {showFilterButton && (
+            <TouchableOpacity 
+              style={[
+                styles.filterButton,
+                hasActiveFilters && styles.filterButtonActive
+              ]}
+              onPress={onFilterPress}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <Ionicons 
+                name="options" 
+                size={24} 
+                color={hasActiveFilters ? '#007AFF' : iconColor} 
+              />
+            </TouchableOpacity>
+          )}
           {showAddButton && (
             <Link href={addButtonLink || '/post/create'} asChild>
               <TouchableOpacity 
@@ -132,6 +165,17 @@ const styles = StyleSheet.create({
   backButton: {
     padding: 4,
     marginRight: 4,
+    borderRadius: 8,
+  },
+  filterButton: {
+    padding: 4,
+    borderRadius: 8,
+  },
+  filterButtonActive: {
+    backgroundColor: '#E3F2FD',
+  },
+  clearFiltersButton: {
+    padding: 4,
     borderRadius: 8,
   },
   title: {
