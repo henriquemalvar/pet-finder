@@ -9,7 +9,7 @@ import { Post, postsService } from '@services/posts';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Container } from '@/components/ui/Container';
 
 export default function PostDetails() {
   const params = useLocalSearchParams();
@@ -45,26 +45,26 @@ export default function PostDetails() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
+      <Container edges={['top']}>
         <Header title="Detalhes do Post" showBackButton />
         <PostDetailsSkeleton />
-      </SafeAreaView>
+      </Container>
     );
   }
 
   if (error || !post) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
+      <Container edges={['top']}>
         <Header title="Detalhes do Post" showBackButton />
         <View style={styles.centered}>
           <Text style={styles.errorText}>{error || 'Post não encontrado'}</Text>
         </View>
-      </SafeAreaView>
+      </Container>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <Container edges={['top']}>
       <Header title="Detalhes do Post" showBackButton />
       <ScrollView style={styles.content} contentContainerStyle={{ paddingBottom: 32 }}>
         <ImageHeader
@@ -138,7 +138,7 @@ export default function PostDetails() {
           </View>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </Container>
   );
 }
 

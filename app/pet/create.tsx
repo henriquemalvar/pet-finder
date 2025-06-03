@@ -6,7 +6,7 @@ import { useAuth } from '@hooks/useAuth';
 import { petsService } from '@services/pets';
 import { useRouter } from 'expo-router';
 import { StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Container } from '@/components/ui/Container';
 
 export default function CreatePet() {
   const router = useRouter();
@@ -36,10 +36,10 @@ export default function CreatePet() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <Container edges={['top']}>
       <Header title="Cadastrar Pet" />
       <PetForm onSubmit={handleSubmit} />
-    </SafeAreaView>
+    </Container>
   );
 }
 

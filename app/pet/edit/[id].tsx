@@ -9,7 +9,7 @@ import { petsService } from '@services/pets';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Container } from '@/components/ui/Container';
 
 export default function EditPet() {
   const router = useRouter();
@@ -49,26 +49,26 @@ export default function EditPet() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
+      <Container edges={['top']}>
         <Header title="Editar Pet" />
         <PetEditSkeleton />
-      </SafeAreaView>
+      </Container>
     );
   }
 
   if (!pet) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
+      <Container edges={['top']}>
         <Header title="Editar Pet" />
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>Pet não encontrado</Text>
         </View>
-      </SafeAreaView>
+      </Container>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <Container edges={['top']}>
       <Header title="Editar Pet" />
       <ScrollView style={styles.content} contentContainerStyle={{ paddingBottom: 32 }}>
         <View style={styles.imageWrapper}>
@@ -85,7 +85,7 @@ export default function EditPet() {
           />
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </Container>
   );
 }
 

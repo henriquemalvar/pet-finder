@@ -1,3 +1,4 @@
+import { Container } from '@/components/ui/Container';
 import { Header } from '@/components/ui/Header';
 import { showToast } from '@/components/ui/Toast';
 import { usersService } from '@/services/users';
@@ -10,7 +11,6 @@ import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { z } from 'zod';
 
 const profileSchema = z.object({
@@ -124,7 +124,7 @@ export default function EditProfile() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <Container edges={['top']}>
       <Header title="Editar Perfil" showBackButton />
       <ScrollView style={styles.content}>
         <View style={styles.avatarSection}>
@@ -301,7 +301,7 @@ export default function EditProfile() {
           </TouchableOpacity>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </Container>
   );
 }
 

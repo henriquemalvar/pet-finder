@@ -10,7 +10,7 @@ import { petsService } from '@services/pets';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { FlatList, RefreshControl, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Container } from '@/components/ui/Container';
 
 export default function MyPets() {
   const router = useRouter();
@@ -86,7 +86,7 @@ export default function MyPets() {
 
   if (error) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
+      <Container edges={['top']}>
         <Header 
           title="Meus Pets" 
           showAddButton 
@@ -108,25 +108,25 @@ export default function MyPets() {
             />
           }
         />
-      </SafeAreaView>
+      </Container>
     );
   }
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
+      <Container edges={['top']}>
         <Header 
           title="Meus Pets" 
           showAddButton 
           addButtonLink="/pet/create"
         />
         {renderSkeletons()}
-      </SafeAreaView>
+      </Container>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <Container edges={['top']}>
       <Header 
         title="Meus Pets" 
         showAddButton 
@@ -176,7 +176,7 @@ export default function MyPets() {
         message={`Tem certeza que deseja excluir o pet "${petToDelete?.name}"? Esta ação não pode ser desfeita.`}
         loading={deleting}
       />
-    </SafeAreaView>
+    </Container>
   );
 }
 

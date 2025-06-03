@@ -1,10 +1,10 @@
+import { Container } from '@/components/ui/Container';
 import { Header } from '@/components/ui/Header';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@hooks/useAuth';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Profile() {
   const router = useRouter();
@@ -29,17 +29,17 @@ export default function Profile() {
 
   if (!user) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
+      <Container edges={['top']}>
         <Header title="Perfil" />
         <View style={styles.centered}>
           <Text>Usuário não encontrado</Text>
         </View>
-      </SafeAreaView>
+      </Container>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <Container edges={['top']}>
       <Header title="Perfil" />
       <ScrollView style={styles.content}>
         <View style={styles.profileHeader}>
@@ -91,7 +91,7 @@ export default function Profile() {
           </TouchableOpacity>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </Container>
   );
 }
 

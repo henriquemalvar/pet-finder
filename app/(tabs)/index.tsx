@@ -8,7 +8,7 @@ import { PostFilters, postsService } from '@services/posts';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Container } from '@/components/ui/Container';
 
 export default function Home() {
   const router = useRouter();
@@ -101,7 +101,7 @@ export default function Home() {
 
   if (error) {
     return (
-      <SafeAreaView style={styles.container}>
+      <Container edges={['top']}>
         <Header 
           title="Posts" 
           showAddButton 
@@ -116,12 +116,12 @@ export default function Home() {
           message={error}
           onRetry={() => loadPosts(1, filters)}
         />
-      </SafeAreaView>
+      </Container>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <Container edges={['top']}>
       <Header 
         title="Posts" 
         showAddButton 
@@ -159,7 +159,7 @@ export default function Home() {
           }
         />
       )}
-    </SafeAreaView>
+    </Container>
   );
 }
 
@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
   },
   list: {
-    padding: 16,
+    paddingHorizontal: 16,
   },
   emptyList: {
     flexGrow: 1,

@@ -1,10 +1,10 @@
 import { Header } from '@/components/ui/Header';
+import { Container } from '@/components/ui/Container';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Terms() {
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <Container edges={['top']}>
       <Header title="Termos de Uso" showBackButton />
       <ScrollView style={styles.content}>
         <View style={styles.section}>
@@ -63,7 +63,7 @@ export default function Terms() {
           </Text>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </Container>
   );
 }
 
