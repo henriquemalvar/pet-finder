@@ -1,173 +1,73 @@
-import { mockPets, mockUsers } from '@lib/mock';
+import { UserWithToken } from '@/types/auth';
+import { Pet, PetSize, PetType } from '@/types/database';
+import api from '@lib/axios';
 
 // Tipos
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  token: string;
-  avatar?: string;
-}
-
-export interface Pet {
-  id: string;
-  name: string;
-  type: string;
-  breed: string;
-  age: string;
-  gender: string;
-  size: string;
-  description: string;
-  image: string;
-  owner: {
-    name: string;
-    phone: string;
-    email: string;
-  };
-}
-
 // Autenticação
 export const authService = {
-  login: async (email: string, password: string): Promise<User> => {
-    // Simulando delay da API
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    const user = mockUsers.find(
-      u => u.email === email && u.password === password
-    );
-
-    if (!user) {
-      throw new Error('E-mail ou senha inválidos');
-    }
-
-    const { password: _, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+  login: async (email: string, password: string): Promise<UserWithToken> => {
+    const response = await api.post<UserWithToken>('/auth/login', {
+      email,
+      password,
+    });
+    return response.data;
   },
 
-  register: async (name: string, email: string, password: string): Promise<User> => {
-    // Simulando delay da API
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    const userExists = mockUsers.some(u => u.email === email);
-    if (userExists) {
-      throw new Error('E-mail já cadastrado');
-    }
-
-    const newUser = {
-      id: String(mockUsers.length + 1),
+  register: async (name: string, email: string, password: string): Promise<UserWithToken> => {
+    const response = await api.post<UserWithToken>('/auth/register', {
       name,
       email,
       password,
-      token: `mock-token-${mockUsers.length + 1}`,
-    };
-
-    const { password: _, ...userWithoutPassword } = newUser;
-    return userWithoutPassword;
+    });
+    return response.data;
   },
 
   resetPassword: async (email: string): Promise<void> => {
-    // Simulando delay da API
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    const userExists = mockUsers.some(u => u.email === email);
-    if (!userExists) {
-      throw new Error('E-mail não encontrado');
-    }
+    await api.post('/auth/reset-password', { email });
   },
 
   changePassword: async (currentPassword: string, newPassword: string): Promise<void> => {
-    // Simulando delay da API
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    const user = mockUsers.find(u => u.password === currentPassword);
-    if (!user) {
-      throw new Error('Senha atual inválida');
-    }
+    await api.post('/auth/change-password', {
+      currentPassword,
+      newPassword,
+    });
   },
 };
 
 // Pets
 export const petService = {
   list: async (): Promise<Pet[]> => {
-    // Simulando delay da API
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    return mockPets;
+    const response = await api.get<Pet[]>('/pets');
+    return response.data;
   },
 
   search: async (params: {
     query?: string;
-    type?: string;
+    type?: PetType;
     age?: string;
-    size?: string;
+    size?: PetSize;
   }): Promise<Pet[]> => {
-    // Simulando delay da API
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    return mockPets.filter(pet => {
-      if (params.query && !pet.name.toLowerCase().includes(params.query.toLowerCase())) {
-        return false;
-      }
-      if (params.type && pet.type !== params.type) {
-        return false;
-      }
-      if (params.age && pet.age !== params.age) {
-        return false;
-      }
-      if (params.size && pet.size !== params.size) {
-        return false;
-      }
-      return true;
-    });
+    const response = await api.get<Pet[]>('/pets/search', { params });
+    return response.data;
   },
 
   getById: async (id: string): Promise<Pet> => {
-    // Simulando delay da API
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    const pet = mockPets.find(p => p.id === id);
-    if (!pet) {
-      throw new Error('Pet não encontrado');
-    }
-    return pet;
+    const response = await api.get<Pet>(`/pets/${id}`);
+    return response.data;
   },
 
-  create: async (data: Omit<Pet, 'id' | 'owner'>): Promise<Pet> => {
-    // Simulando delay da API
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    const newPet = {
-      id: String(mockPets.length + 1),
-      ...data,
-      owner: {
-        name: 'Usuário Logado',
-        phone: '(11) 99999-9999',
-        email: 'usuario@email.com',
-      },
-    };
-
-    return newPet;
+  create: async (data: Omit<Pet, 'id' | 'createdAt' | 'updatedAt'>): Promise<Pet> => {
+    const response = await api.post<Pet>('/pets', data);
+    return response.data;
   },
 
   update: async (id: string, data: Partial<Pet>): Promise<Pet> => {
-    // Simulando delay da API
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    const pet = mockPets.find(p => p.id === id);
-    if (!pet) {
-      throw new Error('Pet não encontrado');
-    }
-
-    return { ...pet, ...data };
+    const response = await api.put<Pet>(`/pets/${id}`, data);
+    return response.data;
   },
 
   delete: async (id: string): Promise<void> => {
-    // Simulando delay da API
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    const pet = mockPets.find(p => p.id === id);
-    if (!pet) {
-      throw new Error('Pet não encontrado');
-    }
+    await api.delete(`/pets/${id}`);
   },
 };
 
@@ -179,12 +79,6 @@ export const messageService = {
     phone: string;
     message: string;
   }): Promise<void> => {
-    // Simulando delay da API
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    const pet = mockPets.find(p => p.id === petId);
-    if (!pet) {
-      throw new Error('Pet não encontrado');
-    }
+    await api.post(`/pets/${petId}/messages`, data);
   },
 }; 

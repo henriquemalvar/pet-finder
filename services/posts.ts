@@ -1,14 +1,14 @@
-import { Post } from '@/types/database';
+import { PetGender, PetSize, Post, PostStatus, PostType } from '@/types/database';
 import api from '@lib/axios';
 import { notificationsService } from './notifications';
 
 export type PostFilters = {
-  type?: 'LOST' | 'FOUND' | 'ADOPTION';
-  status?: 'ACTIVE' | 'RESOLVED' | 'CANCELED';
+  type?: PostType;
+  status?: PostStatus;
   location?: string;
   petType?: string;
-  petGender?: 'MALE' | 'FEMALE';
-  petSize?: 'SMALL' | 'MEDIUM' | 'LARGE';
+  petGender?: PetGender;
+  petSize?: PetSize;
   userId?: string;
   search?: string;
   page?: number;
@@ -27,7 +27,7 @@ export type CreatePostData = {
   title: string;
   content: string;
   petId: string;
-  type: 'ADOPTION' | 'LOST' | 'FOUND';
+  type: PostType;
   location: string;
   description: string;
   contact: string;
@@ -36,27 +36,16 @@ export type CreatePostData = {
 };
 
 export type UpdatePostData = {
-  type?: 'ADOPTION' | 'LOST' | 'FOUND';
+  type?: PostType;
   location?: string;
-  status?: 'ACTIVE' | 'RESOLVED' | 'CANCELED';
+  status?: PostStatus;
 };
 
 export const postsService = {
   async list(filters?: PostFilters): Promise<PostsResponse> {
     try {
       const response = await api.get<PostsResponse>('/posts', {
-        params: {
-          page: filters?.page || 1,
-          limit: filters?.limit || 10,
-          type: filters?.type,
-          status: filters?.status,
-          location: filters?.location,
-          petType: filters?.petType,
-          petGender: filters?.petGender,
-          petSize: filters?.petSize,
-          userId: filters?.userId,
-          search: filters?.search,
-        },
+        params: filters,
       });
       return response.data;
     } catch (error) {
@@ -116,8 +105,12 @@ export const postsService = {
     }
   },
 
-  getByPet: async (petId: string): Promise<Post[]> => {
-    const response = await api.get<Post[]>(`/posts/pet/${petId}`);
-    return response.data;
+  async getByPet(petId: string): Promise<Post[]> {
+    try {
+      const response = await api.get<Post[]>(`/posts/pet/${petId}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
   },
 };

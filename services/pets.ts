@@ -1,29 +1,13 @@
-import { User } from '@/types/database';
+import { Pet, PetGender, PetSize, PetType } from '@/types/database';
 import api from '@lib/axios';
-
-export interface Pet {
-  id: string;
-  name: string;
-  type: string;
-  breed: string;
-  age: string;
-  size: string;
-  gender: string;
-  description: string;
-  images: string[];
-  userId: string;
-  createdAt: string;
-  updatedAt: string;
-  user?: User;
-}
 
 export interface CreatePetData {
   name: string;
-  type: string;
+  type: PetType;
   breed: string;
   age: string;
-  gender: string;
-  size: string;
+  gender: PetGender;
+  size: PetSize;
   description: string;
   image?: string;
   castrated: boolean;
@@ -80,7 +64,7 @@ export const deletePet = async (id: string): Promise<void> => {
 export const petsService = {
   getByUser: async (userId: string): Promise<Pet[]> => {
     try {
-      const { data } = await api.get(`/pets/user/${userId}`);
+      const { data } = await api.get<Pet[]>(`/pets/user/${userId}`);
       return data;
     } catch (err: any) {
       throw new Error(err.response?.data?.message || 'Erro ao buscar pets do usuário');
@@ -93,10 +77,8 @@ export const petsService = {
   },
 
   create: async (data: CreatePetData): Promise<Pet> => {
-    const response = await api.post<Pet>('/pets', data).then(res => res.data).catch(err => {
-      throw err;
-    });
-    return response;
+    const response = await api.post<Pet>('/pets', data);
+    return response.data;
   },
 
   update: async (id: string, data: UpdatePetData): Promise<Pet> => {
