@@ -1,4 +1,3 @@
-import { ListSkeleton } from '@/components/skeletons/ListSkeleton';
 import { Header } from '@/components/ui/Header';
 import { PetImage } from '@/components/PetImage';
 import { Post } from '@/types/database';
@@ -6,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { postsService } from '@services/posts';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function PostList() {
@@ -69,7 +68,9 @@ export default function PostList() {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
         <Header title="Posts" />
-        <ListSkeleton />
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" color="#007AFF" />
+        </View>
       </SafeAreaView>
     );
   }

@@ -1,6 +1,5 @@
 import { PetForm } from '@/components/PetForm';
 import { PetImage } from '@/components/PetImage';
-import { PetEditSkeleton } from '@/components/skeletons/PetEditSkeleton';
 import { Header } from '@/components/ui/Header';
 import { showToast } from '@/components/ui/Toast';
 import { Pet } from '@/types/database';
@@ -8,7 +7,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { petsService } from '@services/pets';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function EditPet() {
@@ -51,7 +50,9 @@ export default function EditPet() {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
         <Header title="Editar Pet" />
-        <PetEditSkeleton />
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" color="#007AFF" />
+        </View>
       </SafeAreaView>
     );
   }
@@ -93,6 +94,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   content: {
     flex: 1,

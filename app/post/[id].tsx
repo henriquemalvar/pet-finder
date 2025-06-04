@@ -1,4 +1,3 @@
-import { PostDetailsSkeleton } from '@/components/skeletons/PostDetailsSkeleton';
 import { Header } from '@/components/ui/Header';
 import { ImageHeader } from '@/components/ui/ImageHeader';
 import { InfoGrid } from '@/components/ui/InfoGrid';
@@ -8,7 +7,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Post, postsService } from '@services/posts';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function PostDetails() {
@@ -47,7 +46,9 @@ export default function PostDetails() {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
         <Header title="Detalhes do Post" showBackButton />
-        <PostDetailsSkeleton />
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" color="#007AFF" />
+        </View>
       </SafeAreaView>
     );
   }
