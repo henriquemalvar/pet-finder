@@ -1,10 +1,10 @@
 import { Container } from '@/components/ui/Container';
 import { Header } from '@/components/ui/Header';
-import { Ionicons } from '@expo/vector-icons';
+import { MenuItem } from '@/components/ui/MenuItem';
 import { useAuth } from '@hooks/useAuth';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 export default function Profile() {
   const router = useRouter();
@@ -52,43 +52,35 @@ export default function Profile() {
         </View>
 
         <View style={styles.menu}>
-          <TouchableOpacity
-            style={styles.menuItem}
+          <MenuItem
+            leftIcon="person-outline"
+            label="Editar Perfil"
             onPress={handleEditProfile}
-          >
-            <Ionicons name="person-outline" size={24} color="#666" />
-            <Text style={styles.menuText}>Editar Perfil</Text>
-            <Ionicons name="chevron-forward" size={24} color="#999" />
-          </TouchableOpacity>
+            rightIcon="chevron-forward"
+          />
 
-          <TouchableOpacity
-            style={styles.menuItem}
+          <MenuItem
+            leftIcon="document-text-outline"
+            label="Termos de Uso"
             onPress={() => router.push('/static/terms')}
-          >
-            <Ionicons name="document-text-outline" size={24} color="#666" />
-            <Text style={styles.menuText}>Termos de Uso</Text>
-            <Ionicons name="chevron-forward" size={24} color="#999" />
-          </TouchableOpacity>
+            rightIcon="chevron-forward"
+          />
 
-          <TouchableOpacity
-            style={styles.menuItem}
+          <MenuItem
+            leftIcon="help-circle-outline"
+            label="Ajuda"
             onPress={() => router.push('/static/help')}
-          >
-            <Ionicons name="help-circle-outline" size={24} color="#666" />
-            <Text style={styles.menuText}>Ajuda</Text>
-            <Ionicons name="chevron-forward" size={24} color="#999" />
-          </TouchableOpacity>
+            rightIcon="chevron-forward"
+          />
 
-          <TouchableOpacity
-            style={[styles.menuItem, styles.signOutButton]}
+          <MenuItem
+            leftIcon="log-out-outline"
+            label={loading ? 'Saindo...' : 'Sair'}
             onPress={handleSignOut}
-            disabled={loading}
-          >
-            <Ionicons name="log-out-outline" size={24} color="#FF3B30" />
-            <Text style={[styles.menuText, styles.signOutText]}>
-              {loading ? 'Saindo...' : 'Sair'}
-            </Text>
-          </TouchableOpacity>
+            style={styles.signOutButton}
+            labelStyle={styles.signOutText}
+            leftIconColor="#FF3B30"
+          />
         </View>
       </ScrollView>
     </Container>

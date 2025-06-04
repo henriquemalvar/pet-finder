@@ -1,8 +1,8 @@
-import { Ionicons } from '@expo/vector-icons';
+import { MenuItem } from '@/components/ui/MenuItem';
 import { useAuth } from '@hooks/useAuth';
 import { router } from 'expo-router';
 import React from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Profile() {
@@ -45,63 +45,54 @@ export default function Profile() {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Configurações</Text>
 
-            <TouchableOpacity 
-              style={styles.menuItem}
+            <MenuItem
+              leftIcon="person-outline"
+              label="Editar Perfil"
               onPress={() => router.push('/user/edit-profile')}
-            >
-              <Ionicons name="person-outline" size={24} color="#1a1a1a" />
-              <Text style={styles.menuItemText}>Editar Perfil</Text>
-              <Ionicons name="chevron-forward" size={24} color="#666" />
-            </TouchableOpacity>
+              rightIcon="chevron-forward"
+            />
 
-            <TouchableOpacity 
-              style={styles.menuItem}
+            <MenuItem
+              leftIcon="notifications-outline"
+              label="Notificações"
               onPress={() => router.push('/user/notifications')}
-            >
-              <Ionicons name="notifications-outline" size={24} color="#1a1a1a" />
-              <Text style={styles.menuItemText}>Notificações</Text>
-              <Ionicons name="chevron-forward" size={24} color="#666" />
-            </TouchableOpacity>
+              rightIcon="chevron-forward"
+            />
 
-            <TouchableOpacity 
-              style={styles.menuItem}
+            <MenuItem
+              leftIcon="lock-closed-outline"
+              label="Alterar Senha"
               onPress={() => router.push('/user/change-password' as any)}
-            >
-              <Ionicons name="lock-closed-outline" size={24} color="#1a1a1a" />
-              <Text style={styles.menuItemText}>Alterar Senha</Text>
-              <Ionicons name="chevron-forward" size={24} color="#666" />
-            </TouchableOpacity>
+              rightIcon="chevron-forward"
+            />
           </View>
 
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Sobre</Text>
 
-            <TouchableOpacity 
-              style={styles.menuItem}
+            <MenuItem
+              leftIcon="help-circle-outline"
+              label="Ajuda"
               onPress={() => router.push('/static/help')}
-            >
-              <Ionicons name="help-circle-outline" size={24} color="#1a1a1a" />
-              <Text style={styles.menuItemText}>Ajuda</Text>
-              <Ionicons name="chevron-forward" size={24} color="#666" />
-            </TouchableOpacity>
+              rightIcon="chevron-forward"
+            />
 
-            <TouchableOpacity 
-              style={styles.menuItem}
+            <MenuItem
+              leftIcon="information-circle-outline"
+              label="Termos de Uso"
               onPress={() => router.push('/static/terms')}
-            >
-              <Ionicons name="information-circle-outline" size={24} color="#1a1a1a" />
-              <Text style={styles.menuItemText}>Termos de Uso</Text>
-              <Ionicons name="chevron-forward" size={24} color="#666" />
-            </TouchableOpacity>
+              rightIcon="chevron-forward"
+            />
           </View>
 
-          <TouchableOpacity 
-            style={styles.logoutButton} 
+          <MenuItem
+            leftIcon="log-out-outline"
+            label="Sair"
             onPress={handleLogout}
-          >
-            <Ionicons name="log-out-outline" size={24} color="#FF3B30" />
-            <Text style={styles.logoutButtonText}>Sair</Text>
-          </TouchableOpacity>
+            style={styles.logoutButton}
+            labelStyle={styles.logoutButtonText}
+            leftIconColor="#FF3B30"
+          />
         </View>
       </ScrollView>
     </SafeAreaView>

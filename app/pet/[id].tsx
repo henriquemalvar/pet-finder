@@ -1,6 +1,6 @@
-import { PetImage } from '@/components/PetImage';
 import { PetDetailsSkeleton } from '@/components/skeletons/PetDetailsSkeleton';
 import { Header } from '@/components/ui/Header';
+import { ImageHeader } from '@/components/ui/ImageHeader';
 import { showToast } from '@/components/ui/Toast';
 import { Pet, PetGender, PetSize, PetType } from '@/types/database';
 import { getPetGenderLabel, getPetSizeLabel, getPetTypeLabel } from '@/utils/pet';
@@ -76,16 +76,12 @@ export default function PetDetails() {
     <SafeAreaView style={styles.container} edges={['top']}>
       <Header title="Detalhes do Pet" showBackButton />
       <ScrollView style={styles.content} contentContainerStyle={{ paddingBottom: 32 }}>
-        <View style={styles.imageWrapper}>
-          <PetImage pet={pet} />
-          <TouchableOpacity style={styles.closeButton} onPress={() => router.back()}>
-            <MaterialCommunityIcons name="close" size={28} color="#222" />
-          </TouchableOpacity>
-          <View style={styles.typeBadge}>
-            <MaterialCommunityIcons name="paw" size={16} color="#fff" />
-            <Text style={styles.typeBadgeText}>{getPetTypeLabel(pet.type as PetType)}</Text>
-          </View>
-        </View>
+        <ImageHeader
+          pet={pet}
+          onClose={() => router.back()}
+          badgeText={getPetTypeLabel(pet.type as PetType)}
+          badgeIcon="paw"
+        />
         <Text style={styles.petName}>{pet.name}</Text>
         <View style={styles.headerRow}>
           <View style={styles.badge}><Text style={styles.badgeText}>{pet.breed}</Text></View>
@@ -147,44 +143,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-  },
-  imageWrapper: {
-    position: 'relative',
-    backgroundColor: '#eee',
-  },
-  image: {
-    width: '100%',
-    height: 260,
-    resizeMode: 'cover',
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
-  },
-  closeButton: {
-    position: 'absolute',
-    top: 36,
-    right: 20,
-    backgroundColor: '#fff',
-    borderRadius: 20,
-    padding: 2,
-    elevation: 2,
-  },
-  typeBadge: {
-    position: 'absolute',
-    left: 20,
-    top: 36,
-    backgroundColor: '#3CB371',
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    gap: 6,
-    elevation: 2,
-  },
-  typeBadgeText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 14,
   },
   content: {
     flex: 1,
