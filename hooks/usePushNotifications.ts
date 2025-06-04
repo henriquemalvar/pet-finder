@@ -1,5 +1,5 @@
 import { showToast } from '@/components/ui/Toast';
-import { notificationsService } from '@services/notifications';
+import { notificationsService } from '@/services/notificationsService';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import { useEffect } from 'react';

@@ -1,4 +1,4 @@
-import { PetAge, PetGender, PetSize, PetType, PostType } from '@/types/database';
+import { PostType, PetType, PetAge, PetSize, PetGender } from "@/types";
 
 export type FilterOption<T> = {
   label: string;

@@ -1,6 +1,5 @@
-
-import { getToken } from '@/services/auth';
 import axios from 'axios';
+import { getToken } from './token';
 
 const baseURL = process.env.EXPO_PUBLIC_API_URL;
 

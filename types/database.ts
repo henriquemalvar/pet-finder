@@ -98,3 +98,9 @@ export interface Post {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export * from './auth';
+export * from './pet';
+export * from './post';
+export * from './user';
+

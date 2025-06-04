@@ -1,6 +1,6 @@
 import { showToast } from '@/components/ui/Toast';
 import { UserWithToken } from '@/types/auth';
-import { authService, getUser, removeUser, saveUser } from '@services/auth';
+import { authService, getUser, removeUser, saveUser } from '@/services/authService';
 import { useCallback, useEffect, useState } from 'react';
 
 export function useAuth() {
@@ -13,15 +13,12 @@ export function useAuth() {
 
   const loadUser = useCallback(async () => {
     try {
-      console.log('Carregando usuário do AsyncStorage...');
       const storedUser = await getUser();
-      console.log('Usuário carregado:', storedUser);
       
       if (storedUser) {
         setUser(storedUser);
       }
     } catch (error) {
-      console.error('Erro ao carregar usuário:', error);
       showToast.error('Erro', 'Erro ao carregar usuário');
     } finally {
       setLoading(false);
@@ -30,17 +27,11 @@ export function useAuth() {
 
   const login = useCallback(async (email: string, password: string) => {
     try {
-      console.log('Iniciando login...');
       const userData = await authService.login({ email, password });
-      console.log('Dados do usuário recebidos:', userData);
-      
       await saveUser(userData);
-      console.log('Usuário salvo no AsyncStorage');
-      
       setUser(userData);
       return userData;
     } catch (error) {
-      console.error('Erro no login:', error);
       showToast.error('Erro', 'Erro no login');
       throw error;
     }

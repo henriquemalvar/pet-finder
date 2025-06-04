@@ -1,13 +1,10 @@
-import { User } from './database';
+import { User } from './user';
 
 export interface UserWithToken extends Omit<User, 'password'> {
   token: string;
-  address?: string;
-  latitude?: number;
-  longitude?: number;
 }
 
 export interface AuthResponse {
   user: UserWithToken;
   token: string;
-} 
+}

@@ -1,6 +1,6 @@
 import { PetGender, PetSize, Post, PostStatus, PostType } from '@/types/database';
 import api from '@lib/axios';
-import { notificationsService } from './notifications';
+import { notificationsService } from './notificationsService';
 
 export type PostFilters = {
   type?: PostType;

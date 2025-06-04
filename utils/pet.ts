@@ -1,4 +1,4 @@
-import { PetGender, PetSize, PetType, PostType } from '@/types/database';
+import { PetType, PetGender, PetSize, PostType } from "@/types";
 
 export const PET_TYPE_LABELS: Record<PetType, string> = {
   [PetType.DOG]: 'Cachorro',
