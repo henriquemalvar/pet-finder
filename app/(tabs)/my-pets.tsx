@@ -1,4 +1,3 @@
-import { PetCardSkeleton } from '@/components/skeletons/PetCardSkeleton';
 import { ConfirmDeleteModal } from '@/components/ui/ConfirmDeleteModal';
 import { Header } from '@/components/ui/Header';
 import { ListState } from '@/components/ui/ListState';
@@ -9,7 +8,7 @@ import { useAuth } from '@hooks/useAuth';
 import { petsService } from '@services/pets';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { FlatList, RefreshControl, StyleSheet } from 'react-native';
+import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function MyPets() {
@@ -19,7 +18,6 @@ export default function MyPets() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showSkeleton, setShowSkeleton] = useState(true);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [petToDelete, setPetToDelete] = useState<Pet | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -30,7 +28,6 @@ export default function MyPets() {
       if(user?.id) {
         const data = await petsService.getByUser(user?.id);
         setPets(data as unknown as Pet[]);
-        setShowSkeleton(false);
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Erro ao carregar pets';
@@ -78,11 +75,6 @@ export default function MyPets() {
     }
   };
 
-  const renderSkeletons = () => {
-    return Array(3).fill(0).map((_, index) => (
-      <PetCardSkeleton key={index} />
-    ));
-  };
 
   if (error) {
     return (
@@ -115,12 +107,14 @@ export default function MyPets() {
   if (loading) {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
-        <Header 
-          title="Meus Pets" 
-          showAddButton 
+        <Header
+          title="Meus Pets"
+          showAddButton
           addButtonLink="/pet/create"
         />
-        {renderSkeletons()}
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" color="#007AFF" />
+        </View>
       </SafeAreaView>
     );
   }
@@ -133,20 +127,16 @@ export default function MyPets() {
         addButtonLink="/pet/create"
       />
       <FlatList
-        data={showSkeleton ? Array(3).fill({}) : pets}
-        renderItem={({ index }) => 
-          showSkeleton ? (
-            <PetCardSkeleton />
-          ) : (
-            <PetCard
-              pet={pets[index]}
-              showActions
-              onEdit={handleEdit}
-              onDelete={() => handleDelete(pets[index])}
-            />
-          )
-        }
-        keyExtractor={(_, index) => showSkeleton ? `skeleton-${index}` : `pet-${index}`}
+        data={pets}
+        renderItem={({ index }) => (
+          <PetCard
+            pet={pets[index]}
+            showActions
+            onEdit={handleEdit}
+            onDelete={() => handleDelete(pets[index])}
+          />
+        )}
+        keyExtractor={(_, index) => `pet-${index}`}
         contentContainerStyle={[
           styles.list,
           (!pets.length || loading) && styles.emptyList

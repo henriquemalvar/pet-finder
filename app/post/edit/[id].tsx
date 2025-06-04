@@ -1,6 +1,5 @@
 import { PetListTile } from '@/components/PetListTile';
-import { PetListTileSkeleton } from '@/components/skeletons/PetListTileSkeleton';
-import { PostEditSkeleton } from '@/components/skeletons/PostEditSkeleton';
+import { ActivityIndicator } from 'react-native';
 import { Header } from '@/components/ui/Header';
 import { showToast } from '@/components/ui/Toast';
 import { Post as DatabasePost, Pet, PostType } from '@/types/database';
@@ -151,7 +150,9 @@ export default function EditPost() {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
         <Header title="Editar Post" showBackButton />
-        <PostEditSkeleton />
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" color="#007AFF" />
+        </View>
       </SafeAreaView>
     );
   }
@@ -222,9 +223,7 @@ export default function EditPost() {
                 <View style={styles.petsListContainer}>
                   {loadingPets ? (
                     <View style={styles.petsListContent}>
-                      <PetListTileSkeleton />
-                      <PetListTileSkeleton />
-                      <PetListTileSkeleton />
+                      <ActivityIndicator size="large" color="#007AFF" />
                     </View>
                   ) : error ? (
                     <View style={styles.errorContainer}>
@@ -385,6 +384,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   keyboardAvoidingView: {
     flex: 1,

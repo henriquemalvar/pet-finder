@@ -1,4 +1,3 @@
-import { PostCardSkeleton } from '@/components/skeletons/PostCardSkeleton';
 import { ConfirmDeleteModal } from '@/components/ui/ConfirmDeleteModal';
 import { Header } from '@/components/ui/Header';
 import { ListState } from '@/components/ui/ListState';
@@ -8,7 +7,7 @@ import { useAuth } from '@hooks/useAuth';
 import { postsService } from '@services/posts';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { FlatList, RefreshControl, StyleSheet } from 'react-native';
+import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function MyPosts() {
@@ -18,7 +17,6 @@ export default function MyPosts() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showSkeleton, setShowSkeleton] = useState(true);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [postToDelete, setPostToDelete] = useState<any | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -29,7 +27,6 @@ export default function MyPosts() {
       if(user?.id) {
         const data = await postsService.getByUser(user?.id);
         setPosts(data);
-        setShowSkeleton(false);
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Erro ao carregar posts';
@@ -77,17 +74,13 @@ export default function MyPosts() {
     }
   };
 
-  const renderSkeletons = () => {
-    return Array(3).fill(0).map((_, index) => (
-      <PostCardSkeleton key={index} showActions={true} />
-    ));
-  };
-
   if (loading) {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
         <Header title="Meus Posts" showAddButton addButtonLink="/post/create" />
-        {renderSkeletons()}
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" color="#007AFF" />
+        </View>
       </SafeAreaView>
     );
   }
@@ -124,20 +117,16 @@ export default function MyPosts() {
         addButtonLink="/post/create"
       />
       <FlatList
-        data={showSkeleton ? Array(3).fill({}) : posts}
-        renderItem={({ index }) => 
-          showSkeleton ? (
-            <PostCardSkeleton />
-          ) : (
-            <PostCard
-              {...posts[index]}
-              showActions
-              onEdit={() => handleEdit(posts[index].id)}
-              onDelete={() => handleDelete(posts[index])}
-            />
-          )
-        }
-        keyExtractor={(_, index) => showSkeleton ? `skeleton-${index}` : `post-${index}`}
+        data={posts}
+        renderItem={({ index }) => (
+          <PostCard
+            {...posts[index]}
+            showActions
+            onEdit={() => handleEdit(posts[index].id)}
+            onDelete={() => handleDelete(posts[index])}
+          />
+        )}
+        keyExtractor={(_, index) => `post-${index}`}
         contentContainerStyle={[
           styles.list,
           (!posts.length || loading) && styles.emptyList

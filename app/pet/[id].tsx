@@ -1,5 +1,4 @@
 import { PetImage } from '@/components/PetImage';
-import { PetDetailsSkeleton } from '@/components/skeletons/PetDetailsSkeleton';
 import { Header } from '@/components/ui/Header';
 import { showToast } from '@/components/ui/Toast';
 import { Pet, PetGender, PetSize, PetType } from '@/types/database';
@@ -8,7 +7,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { petsService } from '@services/pets';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function PetDetails() {
@@ -47,7 +46,9 @@ export default function PetDetails() {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
         <Header title="Detalhes do Pet" showBackButton />
-        <PetDetailsSkeleton />
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" color="#007AFF" />
+        </View>
       </SafeAreaView>
     );
   }

@@ -1,4 +1,3 @@
-import { PostCardSkeleton } from '@/components/skeletons/PostCardSkeleton';
 import { Header } from '@/components/ui/Header';
 import { ListState } from '@/components/ui/ListState';
 import { showToast } from '@/components/ui/Toast';
@@ -7,7 +6,7 @@ import { PostCard } from '@components/PostCard';
 import { PostFilters, postsService } from '@services/posts';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Home() {
@@ -85,11 +84,6 @@ export default function Home() {
     router.setParams({});
   };
 
-  const renderSkeletons = () => {
-    return Array(3).fill(0).map((_, index) => (
-      <PostCardSkeleton key={index} />
-    ));
-  };
 
   const hasActiveFilters = Boolean(
     filters?.type || 
@@ -132,8 +126,8 @@ export default function Home() {
         onClearFilters={handleClearFilters}
       />
       {loading && !refreshing ? (
-        <View style={styles.list}>
-          {renderSkeletons()}
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" color="#007AFF" />
         </View>
       ) : (
         <FlatList
@@ -167,6 +161,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   list: {
     padding: 16,
