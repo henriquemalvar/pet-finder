@@ -1,15 +1,13 @@
 import { PetForm } from '@/components/PetForm';
 import { PetImage } from '@/components/PetImage';
-import { PetEditSkeleton } from '@/components/skeletons/PetEditSkeleton';
-import { Header } from '@/components/ui/Header';
+import { Container } from '@/components/ui/Container';
 import { showToast } from '@/components/ui/Toast';
+import { petsService } from '@/services/petsService';
 import { Pet } from '@/types/database';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { petsService } from '@services/pets';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Container } from '@/components/ui/Container';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function EditPet() {
   const router = useRouter();
@@ -49,17 +47,17 @@ export default function EditPet() {
 
   if (loading) {
     return (
-      <Container edges={['top']}>
-        <Header title="Editar Pet" />
-        <PetEditSkeleton />
+      <Container>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#007AFF" />
+        </View>
       </Container>
     );
   }
 
   if (!pet) {
     return (
-      <Container edges={['top']}>
-        <Header title="Editar Pet" />
+      <Container>
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>Pet não encontrado</Text>
         </View>
@@ -68,8 +66,7 @@ export default function EditPet() {
   }
 
   return (
-    <Container edges={['top']}>
-      <Header title="Editar Pet" />
+    <Container>
       <ScrollView style={styles.content} contentContainerStyle={{ paddingBottom: 32 }}>
         <View style={styles.imageWrapper}>
           <PetImage pet={pet} style={styles.image} />
@@ -140,5 +137,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.06,
     shadowRadius: 8,
     elevation: 2,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 }); 

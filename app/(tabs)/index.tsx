@@ -1,18 +1,17 @@
-import { PostCardSkeleton } from '@/components/skeletons/PostCardSkeleton';
-import { Header } from '@/components/ui/Header';
+import { Container } from '@/components/ui/Container';
 import { ListState } from '@/components/ui/ListState';
 import { showToast } from '@/components/ui/Toast';
+import { PostFilters, postsService } from '@/services/postsService';
 import { Post } from '@/types/database';
 import { PostCard } from '@components/PostCard';
-import { PostFilters, postsService } from '@services/posts';
+import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
-import { Container } from '@/components/ui/Container';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 export default function Home() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ filters?: string }>();
+  const params = useLocalSearchParams<{ filters?: string; title?: string }>();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,6 +33,12 @@ export default function Home() {
       loadPosts(1);
     }
   }, [params.filters]);
+
+  useEffect(() => {
+    if (params.title) {
+      router.setParams({ title: params.title });
+    }
+  }, [params.title, router]);
 
   const loadPosts = async (pageNumber = 1, currentFilters?: PostFilters) => {
     try {
@@ -85,12 +90,6 @@ export default function Home() {
     router.setParams({});
   };
 
-  const renderSkeletons = () => {
-    return Array(3).fill(0).map((_, index) => (
-      <PostCardSkeleton key={index} />
-    ));
-  };
-
   const hasActiveFilters = Boolean(
     filters?.type || 
     filters?.petType || 
@@ -101,16 +100,7 @@ export default function Home() {
 
   if (error) {
     return (
-      <Container edges={['top']}>
-        <Header 
-          title="Posts" 
-          showAddButton 
-          showFilterButton
-          onFilterPress={handleFilterPress}
-          addButtonLink="/post/create"
-          hasActiveFilters={hasActiveFilters}
-          onClearFilters={handleClearFilters}
-        />
+      <Container>
         <ListState 
           type="error" 
           message={error}
@@ -121,57 +111,92 @@ export default function Home() {
   }
 
   return (
-    <Container edges={['top']}>
-      <Header 
-        title="Posts" 
-        showAddButton 
-        showFilterButton
-        onFilterPress={handleFilterPress}
-        addButtonLink="/post/create"
-        hasActiveFilters={hasActiveFilters}
-        onClearFilters={handleClearFilters}
-      />
+    <Container>
       {loading && !refreshing ? (
-        <View style={styles.list}>
-          {renderSkeletons()}
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" color="#007AFF" />
         </View>
       ) : (
-        <FlatList
-          data={posts}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <PostCard {...item} />}
-          contentContainerStyle={[
-            styles.list,
-            !posts.length && styles.emptyList
-          ]}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-          }
-          onEndReached={handleLoadMore}
-          onEndReachedThreshold={0.1}
-          ListEmptyComponent={
-            !loading && posts.length === 0 ? (
-              <ListState 
-                type="empty" 
-                message="Não há posts disponíveis no momento."
-              />
-            ) : null
-          }
-        />
+        <>
+          <FlatList
+            data={posts}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => <PostCard {...item} />}
+            contentContainerStyle={[
+              styles.list,
+              !posts.length && styles.emptyList
+            ]}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+            }
+            onEndReached={handleLoadMore}
+            onEndReachedThreshold={0.1}
+            ListEmptyComponent={
+              !loading && posts.length === 0 ? (
+                <ListState 
+                  type="empty" 
+                  message="Não há posts disponíveis no momento."
+                />
+              ) : null
+            }
+          />
+
+          <View style={styles.fabContainer}>
+            {hasActiveFilters && (
+              <TouchableOpacity 
+                style={[styles.fab, styles.clearFab]} 
+                onPress={handleClearFilters}
+              >
+                <Ionicons name="close" size={24} color="#fff" />
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity 
+              style={[styles.fab, hasActiveFilters && styles.filterFab]} 
+              onPress={handleFilterPress}
+            >
+              <Ionicons name="filter" size={24} color="#fff" />
+            </TouchableOpacity>
+          </View>
+        </>
       )}
     </Container>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
   list: {
     paddingHorizontal: 16,
   },
   emptyList: {
     flexGrow: 1,
+  },
+  fabContainer: {
+    position: 'absolute',
+    right: 16,
+    bottom: 16,
+    flexDirection: 'row',
+    gap: 12,
+  },
+  fab: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#007AFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  clearFab: {
+    backgroundColor: '#FF3B30',
+  },
+  filterFab: {
+    backgroundColor: '#34C759',
   },
 }); 

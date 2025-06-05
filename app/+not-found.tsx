@@ -1,10 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Link } from 'expo-router';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Container } from '@/components/ui/Container';
 
 export default function NotFound() {
   return (
-    <View style={styles.container}>
+    <Container>
       <View style={styles.content}>
         <Ionicons name="paw" size={64} color="#007AFF" />
         <Text style={styles.title}>Ops!</Text>
@@ -21,15 +22,11 @@ export default function NotFound() {
           </TouchableOpacity>
         </Link>
       </View>
-    </View>
+    </Container>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
   content: {
     flex: 1,
     alignItems: 'center',

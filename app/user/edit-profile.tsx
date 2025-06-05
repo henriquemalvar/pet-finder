@@ -1,7 +1,7 @@
 import { Container } from '@/components/ui/Container';
-import { Header } from '@/components/ui/Header';
 import { showToast } from '@/components/ui/Toast';
-import { usersService } from '@/services/users';
+import { UserCard } from '@/components/UserCard';
+import { usersService } from '@/services/usersService';
 import { UpdateUserDTO } from '@/types/database';
 import { Ionicons } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -61,15 +61,6 @@ export default function EditProfile() {
     }
   }, [user, reset]);
 
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(word => word[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
   const getCurrentLocation = async () => {
     try {
       setLoadingLocation(true);
@@ -124,15 +115,10 @@ export default function EditProfile() {
   };
 
   return (
-    <Container edges={['top']}>
-      <Header title="Editar Perfil" showBackButton />
+    <Container>
       <ScrollView style={styles.content}>
         <View style={styles.avatarSection}>
-          <View style={styles.avatarContainer}>
-            <Text style={styles.avatarText}>
-              {getInitials(user?.name || '')}
-            </Text>
-          </View>
+          <UserCard user={user} size="large" />
         </View>
 
         <View style={styles.form}>
@@ -319,29 +305,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
-  },
-  avatarContainer: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: '#007AFF',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 3,
-    borderColor: '#fff',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  avatarText: {
-    color: '#fff',
-    fontSize: 48,
-    fontWeight: 'bold',
   },
   form: {
     padding: 16,

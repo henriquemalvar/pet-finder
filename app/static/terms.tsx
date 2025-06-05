@@ -1,11 +1,9 @@
-import { Header } from '@/components/ui/Header';
 import { Container } from '@/components/ui/Container';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 export default function Terms() {
   return (
-    <Container edges={['top']}>
-      <Header title="Termos de Uso" showBackButton />
+    <Container>
       <ScrollView style={styles.content}>
         <View style={styles.section}>
           <Text style={styles.title}>1. Aceitação dos Termos</Text>

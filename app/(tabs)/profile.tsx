@@ -1,9 +1,10 @@
+import { Container } from '@/components/ui/Container';
+import { UserCard } from '@/components/UserCard';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@hooks/useAuth';
 import { router } from 'expo-router';
 import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Profile() {
   const { user, logout } = useAuth();
@@ -17,28 +18,11 @@ export default function Profile() {
     }
   };
 
-  // Função para gerar as iniciais do nome
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(word => word[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <Container>
       <ScrollView>
         <View style={styles.header}>
-          <View style={styles.avatarContainer}>
-            <Text style={styles.avatarText}>
-              {getInitials(user?.name || 'User')}
-            </Text>
-          </View>
-
-          <Text style={styles.name}>{user?.name || 'Usuário'}</Text>
-          <Text style={styles.email}>{user?.email || 'usuario@email.com'}</Text>
+          <UserCard user={user} size="large" />
         </View>
 
         <View style={styles.content}>
@@ -104,52 +88,16 @@ export default function Profile() {
           </TouchableOpacity>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </Container>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
   header: {
     alignItems: 'center',
     padding: 24,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
-  },
-  avatarContainer: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: '#007AFF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  avatarText: {
-    fontSize: 48,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  name: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
-    marginBottom: 4,
-  },
-  email: {
-    fontSize: 16,
-    color: '#666',
   },
   content: {
     padding: 24,

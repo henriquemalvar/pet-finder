@@ -1,24 +1,22 @@
-import { PostCardSkeleton } from '@/components/skeletons/PostCardSkeleton';
 import { ConfirmDeleteModal } from '@/components/ui/ConfirmDeleteModal';
-import { Header } from '@/components/ui/Header';
+import { Container } from '@/components/ui/Container';
 import { ListState } from '@/components/ui/ListState';
 import { showToast } from '@/components/ui/Toast';
+import { postsService } from '@/services/postsService';
 import { PostCard } from '@components/PostCard';
 import { useAuth } from '@hooks/useAuth';
-import { postsService } from '@services/posts';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { FlatList, RefreshControl, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 
 export default function MyPosts() {
   const router = useRouter();
   const { user } = useAuth();
   const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activityIndicatorVisible, setActivityIndicatorVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showSkeleton, setShowSkeleton] = useState(true);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [postToDelete, setPostToDelete] = useState<any | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -26,18 +24,21 @@ export default function MyPosts() {
   const loadPosts = useCallback(async () => {
     try {
       setError(null);
+      setActivityIndicatorVisible(true);
       if(user?.id) {
         const data = await postsService.getByUser(user?.id);
         setPosts(data);
-        setShowSkeleton(false);
+        setActivityIndicatorVisible(false);
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Erro ao carregar posts';
       setError(errorMessage);
       showToast.error('Erro', errorMessage);
+      setActivityIndicatorVisible(false);
     } finally {
       setLoading(false);
       setRefreshing(false);
+      setActivityIndicatorVisible(false);
     }
   }, [user?.id]);
 
@@ -77,25 +78,19 @@ export default function MyPosts() {
     }
   };
 
-  const renderSkeletons = () => {
-    return Array(3).fill(0).map((_, index) => (
-      <PostCardSkeleton key={index} showActions={true} />
-    ));
-  };
-
-  if (loading) {
+  if (loading || activityIndicatorVisible) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
-        <Header title="Meus Posts" showAddButton addButtonLink="/post/create" />
-        {renderSkeletons()}
-      </SafeAreaView>
+      <Container>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#007AFF" />
+        </View>
+      </Container>
     );
   }
 
   if (error) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
-        <Header title="Meus Posts" showAddButton addButtonLink="/post/create" />
+      <Container>
         <FlatList
           data={[]}
           renderItem={() => null}
@@ -112,32 +107,23 @@ export default function MyPosts() {
             />
           }
         />
-      </SafeAreaView>
+      </Container>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <Header 
-        title="Meus Posts" 
-        showAddButton 
-        addButtonLink="/post/create"
-      />
+    <Container>
       <FlatList
-        data={showSkeleton ? Array(3).fill({}) : posts}
-        renderItem={({ index }) => 
-          showSkeleton ? (
-            <PostCardSkeleton />
-          ) : (
-            <PostCard
-              {...posts[index]}
-              showActions
-              onEdit={() => handleEdit(posts[index].id)}
-              onDelete={() => handleDelete(posts[index])}
-            />
-          )
-        }
-        keyExtractor={(_, index) => showSkeleton ? `skeleton-${index}` : `post-${index}`}
+        data={posts}
+        renderItem={({ item }) => (
+          <PostCard
+            {...item}
+            showActions
+            onEdit={() => handleEdit(item.id)}
+            onDelete={() => handleDelete(item)}
+          />
+        )}
+        keyExtractor={(item) => item.id}
         contentContainerStyle={[
           styles.list,
           (!posts.length || loading) && styles.emptyList
@@ -167,37 +153,27 @@ export default function MyPosts() {
         message={`Tem certeza que deseja excluir este post? Esta ação não pode ser desfeita.`}
         loading={deleting}
       />
-    </SafeAreaView>
+    </Container>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  loadingContainer: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   list: {
     padding: 16,
     gap: 16,
   },
   emptyList: {
-    flexGrow: 1,
+    flex: 1,
+    justifyContent: 'center',
   },
   centered: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 16,
-  },
-  errorText: {
-    color: '#FF6B6B',
-    fontSize: 16,
-    textAlign: 'center',
-    marginHorizontal: 16,
-  },
-  emptyText: {
-    color: '#666',
-    fontSize: 16,
-    textAlign: 'center',
   },
 }); 

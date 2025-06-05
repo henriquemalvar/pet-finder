@@ -1,36 +1,34 @@
-import { PetCardSkeleton } from '@/components/skeletons/PetCardSkeleton';
 import { ConfirmDeleteModal } from '@/components/ui/ConfirmDeleteModal';
-import { Header } from '@/components/ui/Header';
+import { Container } from '@/components/ui/Container';
 import { ListState } from '@/components/ui/ListState';
 import { showToast } from '@/components/ui/Toast';
+import { petsService } from '@/services/petsService';
 import { Pet } from '@/types/database';
 import { PetCard } from '@components/PetCard';
 import { useAuth } from '@hooks/useAuth';
-import { petsService } from '@services/pets';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { FlatList, RefreshControl, StyleSheet } from 'react-native';
-import { Container } from '@/components/ui/Container';
+import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 
 export default function MyPets() {
   const router = useRouter();
   const { user } = useAuth();
   const [pets, setPets] = useState<Pet[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activityIndicatorVisible, setActivityIndicatorVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showSkeleton, setShowSkeleton] = useState(true);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [petToDelete, setPetToDelete] = useState<Pet | null>(null);
   const [deleting, setDeleting] = useState(false);
 
   const loadPets = useCallback(async () => {
     try {
+      setActivityIndicatorVisible(true);
       setError(null);
       if(user?.id) {
         const data = await petsService.getByUser(user?.id);
         setPets(data as unknown as Pet[]);
-        setShowSkeleton(false);
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Erro ao carregar pets';
@@ -39,6 +37,7 @@ export default function MyPets() {
     } finally {
       setLoading(false);
       setRefreshing(false);
+      setActivityIndicatorVisible(false);
     }
   }, [user?.id]);
 
@@ -78,20 +77,9 @@ export default function MyPets() {
     }
   };
 
-  const renderSkeletons = () => {
-    return Array(3).fill(0).map((_, index) => (
-      <PetCardSkeleton key={index} />
-    ));
-  };
-
   if (error) {
     return (
-      <Container edges={['top']}>
-        <Header 
-          title="Meus Pets" 
-          showAddButton 
-          addButtonLink="/pet/create"
-        />
+      <Container>
         <FlatList
           data={[]}
           renderItem={() => null}
@@ -112,41 +100,29 @@ export default function MyPets() {
     );
   }
 
-  if (loading) {
+  if (loading || activityIndicatorVisible) {
     return (
-      <Container edges={['top']}>
-        <Header 
-          title="Meus Pets" 
-          showAddButton 
-          addButtonLink="/pet/create"
-        />
-        {renderSkeletons()}
+      <Container>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#007AFF" />
+        </View>
       </Container>
     );
   }
 
   return (
-    <Container edges={['top']}>
-      <Header 
-        title="Meus Pets" 
-        showAddButton 
-        addButtonLink="/pet/create"
-      />
+    <Container>
       <FlatList
-        data={showSkeleton ? Array(3).fill({}) : pets}
-        renderItem={({ index }) => 
-          showSkeleton ? (
-            <PetCardSkeleton />
-          ) : (
-            <PetCard
-              pet={pets[index]}
-              showActions
-              onEdit={handleEdit}
-              onDelete={() => handleDelete(pets[index])}
-            />
-          )
-        }
-        keyExtractor={(_, index) => showSkeleton ? `skeleton-${index}` : `pet-${index}`}
+        data={pets}
+        renderItem={({ item }) => (
+          <PetCard
+            pet={item}
+            showActions
+            onEdit={handleEdit}
+            onDelete={() => handleDelete(item)}
+          />
+        )}
+        keyExtractor={(item) => item.id}
         contentContainerStyle={[
           styles.list,
           (!pets.length || loading) && styles.emptyList
@@ -181,21 +157,22 @@ export default function MyPets() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  loadingContainer: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   list: {
     padding: 16,
     gap: 16,
   },
   emptyList: {
-    flexGrow: 1,
+    flex: 1,
+    justifyContent: 'center',
   },
   centered: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 16,
   },
 }); 

@@ -1,21 +1,42 @@
 import { PetForm } from '@/components/PetForm';
-import { Header } from '@/components/ui/Header';
+import { Container } from '@/components/ui/Container';
 import { showToast } from '@/components/ui/Toast';
+import { petsService } from '@/services/petsService';
+import { uploadService } from '@/services/uploadService';
 import { Pet, PetType } from '@/types/database';
 import { useAuth } from '@hooks/useAuth';
-import { petsService } from '@services/pets';
+import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { StyleSheet } from 'react-native';
-import { Container } from '@/components/ui/Container';
 
 export default function CreatePet() {
   const router = useRouter();
   const { user } = useAuth();
 
+  const handleImagePick = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+      });
+
+      if (!result.canceled) {
+        return result.assets[0];
+      }
+    } catch (error) {
+      showToast.error('Erro', 'Não foi possível selecionar a imagem');
+    }
+    return null;
+  };
+
   const handleSubmit = async (data: Omit<Pet, 'id' | 'createdAt' | 'updatedAt' | 'userId' | 'user' | 'posts'>) => {
     try {
       if (!user?.id) return;
-      await petsService.create({
+
+      // Primeiro, criar o pet
+      const pet = await petsService.create({
         name: data.name,
         type: data.type as PetType,
         breed: data.breed,
@@ -27,6 +48,20 @@ export default function CreatePet() {
         castrated: data.castrated,
         vaccinated: data.vaccinated
       });
+
+      // Depois, selecionar e fazer upload da foto
+      const image = await handleImagePick();
+      if (image) {
+        const formData = new FormData();
+        formData.append('file', {
+          uri: image.uri,
+          type: 'image/jpeg',
+          name: 'photo.jpg',
+        } as any);
+
+        await uploadService.uploadPetPhoto(pet.id, formData);
+      }
+
       showToast.success('Sucesso', 'Pet cadastrado com sucesso');
       router.back();
     } catch (error) {
@@ -36,8 +71,7 @@ export default function CreatePet() {
   };
 
   return (
-    <Container edges={['top']}>
-      <Header title="Cadastrar Pet" />
+    <Container>
       <PetForm onSubmit={handleSubmit} />
     </Container>
   );

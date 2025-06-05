@@ -1,12 +1,11 @@
-import { ListSkeleton } from '@/components/skeletons/ListSkeleton';
-import { Header } from '@/components/ui/Header';
 import { PetImage } from '@/components/PetImage';
+import { Header } from '@/components/ui/Header';
+import { postsService } from '@/services/postsService';
 import { Post } from '@/types/database';
 import { Ionicons } from '@expo/vector-icons';
-import { postsService } from '@services/posts';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function PostList() {
@@ -68,15 +67,15 @@ export default function PostList() {
   if (loading && !refreshing) {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
-        <Header title="Posts" />
-        <ListSkeleton />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#007AFF" />
+        </View>
       </SafeAreaView>
     );
   }
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <Header title="Posts" />
       {error ? (
         <View style={styles.centered}>
           <Text style={styles.errorText}>{error}</Text>
@@ -105,23 +104,20 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-  centered: {
+  loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  errorText: {
-    color: '#FF3B30',
-    fontSize: 16,
-    textAlign: 'center',
-    marginHorizontal: 16,
-  },
   list: {
     padding: 16,
+    gap: 16,
   },
   postCard: {
+    flexDirection: 'row',
     backgroundColor: '#fff',
     borderRadius: 12,
+    padding: 16,
     marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: {
@@ -131,27 +127,26 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
-    overflow: 'hidden',
   },
   postImage: {
-    width: '100%',
-    height: 200,
-    resizeMode: 'cover',
+    width: 80,
+    height: 80,
+    borderRadius: 8,
   },
   postInfo: {
-    padding: 16,
+    flex: 1,
+    marginLeft: 16,
   },
   postTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: '600',
     color: '#1a1a1a',
-    marginBottom: 8,
+    marginBottom: 4,
   },
   postDescription: {
     fontSize: 14,
     color: '#666',
-    marginBottom: 12,
-    lineHeight: 20,
+    marginBottom: 8,
   },
   postMetadata: {
     flexDirection: 'row',
@@ -164,6 +159,17 @@ const styles = StyleSheet.create({
   },
   postAuthor: {
     fontSize: 12,
-    color: '#666',
+    color: '#999',
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorText: {
+    color: '#FF3B30',
+    fontSize: 16,
+    textAlign: 'center',
+    marginHorizontal: 16,
   },
 }); 

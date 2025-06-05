@@ -1,21 +1,20 @@
 import { PetListTile } from '@/components/PetListTile';
-import { PetListTileSkeleton } from '@/components/skeletons/PetListTileSkeleton';
-import { PostEditSkeleton } from '@/components/skeletons/PostEditSkeleton';
-import { Header } from '@/components/ui/Header';
+import { Container } from '@/components/ui/Container';
 import { showToast } from '@/components/ui/Toast';
+import { petsService } from '@/services/petsService';
+import { postsService } from '@/services/postsService';
+import { uploadService } from '@/services/uploadService';
 import { Pet, PostType } from '@/types/database';
 import { ESTADOS } from '@/utils/estados';
 import { Ionicons } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '@hooks/useAuth';
-import { petsService } from '@services/pets';
-import { postsService } from '@services/posts';
+import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, RefreshControl, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { ActivityIndicator, Image, KeyboardAvoidingView, Modal, Platform, RefreshControl, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { z } from 'zod';
 
 const postSchema = z.object({
@@ -48,6 +47,7 @@ export default function CreatePost() {
   const [error, setError] = useState<string | null>(null);
   const [loadingLocation, setLoadingLocation] = useState(false);
   const [showStateModal, setShowStateModal] = useState(false);
+  const [selectedImages, setSelectedImages] = useState<ImagePicker.ImagePickerAsset[]>([]);
 
   const { control, handleSubmit, formState: { errors }, setValue } = useForm<PostFormData>({
     resolver: zodResolver(postSchema),
@@ -69,13 +69,13 @@ export default function CreatePost() {
     try {
       setLoadingPets(true);
       setError(null);
-      
+
       if (!user?.id) {
         throw new Error('Usuário não autenticado');
       }
 
       const userPets = await petsService.getByUser(user.id);
-      
+
       if (!Array.isArray(userPets)) {
         setPets([]);
         return;
@@ -95,7 +95,7 @@ export default function CreatePost() {
   const getCurrentLocation = useCallback(async () => {
     try {
       setLoadingLocation(true);
-      
+
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
         showToast.error('Erro', 'Permissão de localização negada');
@@ -113,9 +113,9 @@ export default function CreatePost() {
       if (address) {
         setValue('district', address.district || '');
         setValue('city', address.city || '');
-        
+
         // Encontrar a sigla do estado pelo nome
-        const estado = ESTADOS.find(e => 
+        const estado = ESTADOS.find(e =>
           e.nome.toLowerCase() === address.region?.toLowerCase()
         );
         setValue('state', estado?.sigla || '');
@@ -141,11 +141,36 @@ export default function CreatePost() {
     router.push('/pet/create');
   };
 
+  const handleImagePick = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+        allowsMultipleSelection: true,
+        selectionLimit: 5,
+      });
+
+      if (!result.canceled) {
+        setSelectedImages(prev => [...prev, ...result.assets]);
+      }
+    } catch (error) {
+      showToast.error('Erro', 'Não foi possível selecionar as imagens');
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setSelectedImages(prev => prev.filter((_, i) => i !== index));
+  };
+
   const onSubmit = async (data: PostFormData) => {
     try {
       setLoading(true);
       const location = `${data.district}, ${data.city}, ${data.state}`;
-      await postsService.create({
+
+      // Criar o post
+      const post = await postsService.create({
         petId: data.petId,
         type: data.type,
         location,
@@ -156,6 +181,19 @@ export default function CreatePost() {
         latitude: data.latitude,
         longitude: data.longitude,
       });
+
+      // Fazer upload das imagens
+      for (const image of selectedImages) {
+        const formData = new FormData();
+        formData.append('file', {
+          uri: image.uri,
+          type: 'image/jpeg',
+          name: 'photo.jpg',
+        } as any);
+
+        await uploadService.uploadFile(formData);
+      }
+
       showToast.success('Sucesso', 'Post criado com sucesso');
       router.back();
     } catch (error) {
@@ -174,21 +212,21 @@ export default function CreatePost() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
-        <Header title="Criar Post" showBackButton />
-        <PostEditSkeleton />
-      </SafeAreaView>
+      <Container>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#007AFF" />
+        </View>
+      </Container>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <Header title="Criar Post" showBackButton />
-      <KeyboardAvoidingView 
+    <Container>
+      <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoidingView}
       >
-        <ScrollView 
+        <ScrollView
           style={styles.content}
           keyboardShouldPersistTaps="handled"
         >
@@ -209,10 +247,10 @@ export default function CreatePost() {
                         ]}
                         onPress={() => onChange(option.value)}
                       >
-                        <Ionicons 
-                          name={option.icon as any} 
-                          size={24} 
-                          color={value === option.value ? '#fff' : '#666'} 
+                        <Ionicons
+                          name={option.icon as any}
+                          size={24}
+                          color={value === option.value ? '#fff' : '#666'}
                           style={styles.optionIcon}
                         />
                         <Text
@@ -247,14 +285,12 @@ export default function CreatePost() {
                 <View style={styles.petsListContainer}>
                   {loadingPets ? (
                     <View style={styles.petsListContent}>
-                      <PetListTileSkeleton />
-                      <PetListTileSkeleton />
-                      <PetListTileSkeleton />
+                      <ActivityIndicator size="large" color="#007AFF" />
                     </View>
                   ) : error ? (
                     <View style={styles.errorContainer}>
                       <Text style={styles.errorText}>{error}</Text>
-                      <TouchableOpacity 
+                      <TouchableOpacity
                         style={styles.retryButton}
                         onPress={loadPets}
                       >
@@ -266,7 +302,7 @@ export default function CreatePost() {
                       <Text style={styles.emptyText}>Você ainda não tem pets cadastrados</Text>
                     </View>
                   ) : (
-                    <ScrollView 
+                    <ScrollView
                       style={styles.petsList}
                       contentContainerStyle={styles.petsListContent}
                       showsVerticalScrollIndicator={true}
@@ -464,8 +500,37 @@ export default function CreatePost() {
               )}
             </View>
 
-            <TouchableOpacity 
-              style={[styles.button, loading && styles.buttonDisabled]} 
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Fotos</Text>
+              <View style={styles.imagesContainer}>
+                {selectedImages.map((image, index) => (
+                  <View key={index} style={styles.imageWrapper}>
+                    <Image
+                      source={{ uri: image.uri }}
+                      style={styles.image}
+                    />
+                    <TouchableOpacity
+                      style={styles.removeImageButton}
+                      onPress={() => removeImage(index)}
+                    >
+                      <Ionicons name="close-circle" size={24} color="#FF3B30" />
+                    </TouchableOpacity>
+                  </View>
+                ))}
+                {selectedImages.length < 5 && (
+                  <TouchableOpacity
+                    style={styles.addImageButton}
+                    onPress={handleImagePick}
+                  >
+                    <Ionicons name="add" size={32} color="#007AFF" />
+                    <Text style={styles.addImageText}>Adicionar foto</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            </View>
+
+            <TouchableOpacity
+              style={[styles.button, loading && styles.buttonDisabled]}
               onPress={handleSubmit(onSubmit)}
               disabled={loading}
             >
@@ -515,15 +580,11 @@ export default function CreatePost() {
           </View>
         </View>
       </Modal>
-    </SafeAreaView>
+    </Container>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
   keyboardAvoidingView: {
     flex: 1,
   },
@@ -761,5 +822,50 @@ const styles = StyleSheet.create({
   modalItemText: {
     fontSize: 16,
     color: '#1a1a1a',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  imagesContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 8,
+  },
+  imageWrapper: {
+    width: 100,
+    height: 100,
+    borderRadius: 8,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+  },
+  removeImageButton: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    borderRadius: 12,
+  },
+  addImageButton: {
+    width: 100,
+    height: 100,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: '#007AFF',
+    borderStyle: 'dashed',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+  },
+  addImageText: {
+    color: '#007AFF',
+    fontSize: 12,
+    textAlign: 'center',
   },
 }); 

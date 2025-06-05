@@ -1,12 +1,12 @@
 import { PetImage } from '@/components/PetImage';
-import { ListSkeleton } from '@/components/skeletons/ListSkeleton';
 import { Header } from '@/components/ui/Header';
+import { petsService } from '@/services/petsService';
+import { Pet } from '@/types/database';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@hooks/useAuth';
-import { Pet, petsService } from '@services/pets';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function PetList() {
@@ -62,15 +62,13 @@ export default function PetList() {
   if (loading && !refreshing) {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
-        <Header title="Pets" />
-        <ListSkeleton />
+        <ActivityIndicator size="large" color="#007AFF" />
       </SafeAreaView>
     );
   }
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <Header title="Pets" />
       {error ? (
         <View style={styles.centered}>
           <Text style={styles.errorText}>{error}</Text>

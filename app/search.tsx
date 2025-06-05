@@ -1,7 +1,7 @@
-import { Header } from '@/components/ui/Header';
+import { Container } from '@/components/ui/Container';
 import { showToast } from '@/components/ui/Toast';
-import { PostFilters, postsService } from '@/services/posts';
-import { PetGender, PetSize } from '@/types/database';
+import { PostFilters, postsService } from '@/services/postsService';
+import { PetAge, PetGender, PetSize, PetType, PostStatus, PostType } from '@/types';
 import { ageOptions, genderOptions, petTypeOptions, sizeOptions, typeOptions, type PetTypeValue, type PostTypeValue } from '@/utils/filters';
 import { Ionicons } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -9,14 +9,13 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { z } from 'zod';
 
 const searchSchema = z.object({
   search: z.string(),
-  type: z.enum(['LOST', 'FOUND', 'ADOPTION']).optional(),
-  petType: z.enum(['DOG', 'CAT']).optional(),
-  age: z.enum(['PUPPY', 'YOUNG', 'ADULT', 'SENIOR']).optional(),
+  type: z.nativeEnum(PostType).optional(),
+  petType: z.nativeEnum(PetType).optional(),
+  age: z.nativeEnum(PetAge).optional(),
   petSize: z.nativeEnum(PetSize).optional(),
   petGender: z.nativeEnum(PetGender).optional(),
 });
@@ -41,35 +40,48 @@ export default function Search() {
   });
 
   useEffect(() => {
+    console.log('Parâmetros recebidos:', params);
+    
     if (params.filters) {
       try {
         const parsedFilters = JSON.parse(params.filters) as PostFilters;
-        reset({
+        console.log('Filtros parseados:', parsedFilters);
+        
+        const formData = {
           search: parsedFilters.search || '',
           type: parsedFilters.type as PostTypeValue,
           petType: parsedFilters.petType as PetTypeValue,
           petSize: parsedFilters.petSize as PetSize,
           petGender: parsedFilters.petGender as PetGender,
-        });
+        };
+        
+        console.log('Dados do formulário a serem aplicados:', formData);
+        reset(formData);
+        console.log('Formulário atualizado com os filtros');
       } catch (error) {
+        console.error('Erro ao parsear filtros:', error);
         showToast.error('Erro', 'Filtros inválidos');
       }
+    } else {
+      console.log('Nenhum filtro recebido');
     }
-  }, [params.filters, reset]);
+  }, [params.filters]);
 
   const onSubmit = async (data: SearchFormData) => {
     try {
       setLoading(true);
+      console.log('Submetendo filtros:', data);
       
       const filters: PostFilters = {
-        type: data.type,
-        status: 'ACTIVE',
+        type: data.type as PostTypeValue,
+        status: PostStatus.ACTIVE,
         petType: data.petType,
         petGender: data.petGender,
         petSize: data.petSize,
         search: data.search || undefined,
       };
 
+      console.log('Filtros formatados:', filters);
       const response = await postsService.list(filters);
       
       if (response.posts.length === 0) {
@@ -82,6 +94,7 @@ export default function Search() {
         params: { filters: JSON.stringify(filters) }
       });
     } catch (error) {
+      console.error('Erro ao buscar posts:', error);
       showToast.error('Erro', 'Não foi possível realizar a busca. Tente novamente.');
     } finally {
       setLoading(false);
@@ -89,7 +102,12 @@ export default function Search() {
   };
 
   const handleClearFilters = () => {
+    console.log('Limpando filtros');
     reset();
+    router.push({
+      pathname: '/(tabs)',
+      params: {}
+    });
   };
 
   const renderFilterButton = <T extends string>(
@@ -134,15 +152,10 @@ export default function Search() {
     watch('petGender')
   );
 
-  return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <Header 
-        title="Busca Avançada" 
-        showBackButton
-        hasActiveFilters={hasActiveFilters}
-        onClearFilters={handleClearFilters}
-      />
+  console.log('Estado atual do formulário:', watch());
 
+  return (
+    <Container>
       <ScrollView 
         style={styles.content}
         contentContainerStyle={styles.contentContainer}
@@ -282,30 +295,37 @@ export default function Search() {
           </View>
         </View>
 
-        <TouchableOpacity 
-          style={[styles.button, loading && styles.buttonDisabled]}
-          onPress={handleSubmit(onSubmit)}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator size="small" color="#fff" />
-          ) : (
-            <React.Fragment>
-              <Ionicons name="search" size={20} color="#fff" style={styles.buttonIcon} />
-              <Text style={styles.buttonText}>Buscar</Text>
-            </React.Fragment>
+        <View style={styles.buttonContainer}>
+          {hasActiveFilters && (
+            <TouchableOpacity 
+              style={[styles.button, styles.clearButton]} 
+              onPress={handleClearFilters}
+            >
+              <Ionicons name="close" size={20} color="#fff" style={styles.buttonIcon} />
+              <Text style={styles.buttonText}>Limpar</Text>
+            </TouchableOpacity>
           )}
-        </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.button, loading && styles.buttonDisabled]}
+            onPress={handleSubmit(onSubmit)}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <React.Fragment>
+                <Ionicons name="search" size={20} color="#fff" style={styles.buttonIcon} />
+                <Text style={styles.buttonText}>Buscar</Text>
+              </React.Fragment>
+            )}
+          </TouchableOpacity>
+        </View>
       </ScrollView>
-    </SafeAreaView>
+    </Container>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
   content: {
     flex: 1,
   },
@@ -395,12 +415,17 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '600',
   },
+  buttonContainer: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 8,
+  },
   button: {
+    flex: 1,
     backgroundColor: '#007AFF',
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
-    marginTop: 8,
     flexDirection: 'row',
     justifyContent: 'center',
     shadowColor: '#000',
@@ -411,6 +436,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+  },
+  clearButton: {
+    backgroundColor: '#FF3B30',
   },
   buttonDisabled: {
     opacity: 0.7,

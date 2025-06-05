@@ -1,7 +1,9 @@
-import { Header } from '@/components/ui/Header';
+import { Container } from '@/components/ui/Container';
+import { Ionicons } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '@hooks/useAuth';
 import { router } from 'expo-router';
+import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { ActivityIndicator, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { z } from 'zod';
@@ -23,6 +25,10 @@ type ChangePasswordFormData = z.infer<typeof changePasswordSchema>;
 
 export default function ChangePassword() {
   const { changePassword } = useAuth();
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const { control, handleSubmit, formState: { errors, isSubmitting } } = useForm<ChangePasswordFormData>({
     resolver: zodResolver(changePasswordSchema),
     defaultValues: {
@@ -43,27 +49,37 @@ export default function ChangePassword() {
   };
 
   return (
-    <View style={styles.container}>
-      <Header title="Alterar Senha" showBackButton />
-      
+    <Container>
       <View style={styles.content}>
         <View style={styles.form}>
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Senha Atual</Text>
-            <Controller
-              control={control}
-              name="currentPassword"
-              render={({ field: { onChange, value } }) => (
-                <TextInput
-                  style={[styles.input, errors.currentPassword && styles.inputError]}
-                  placeholder="Digite sua senha atual"
-                  placeholderTextColor="#666"
-                  value={value}
-                  onChangeText={onChange}
-                  secureTextEntry
+            <View style={styles.passwordContainer}>
+              <Controller
+                control={control}
+                name="currentPassword"
+                render={({ field: { onChange, value } }) => (
+                  <TextInput
+                    style={[styles.input, styles.passwordInput, errors.currentPassword && styles.inputError]}
+                    placeholder="Digite sua senha atual"
+                    placeholderTextColor="#666"
+                    value={value}
+                    onChangeText={onChange}
+                    secureTextEntry={!showCurrentPassword}
+                  />
+                )}
+              />
+              <TouchableOpacity
+                style={styles.eyeIcon}
+                onPress={() => setShowCurrentPassword(!showCurrentPassword)}
+              >
+                <Ionicons
+                  name={showCurrentPassword ? 'eye-off' : 'eye'}
+                  size={24}
+                  color="#666"
                 />
-              )}
-            />
+              </TouchableOpacity>
+            </View>
             {errors.currentPassword && (
               <Text style={styles.errorText}>{errors.currentPassword.message}</Text>
             )}
@@ -71,20 +87,32 @@ export default function ChangePassword() {
 
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Nova Senha</Text>
-            <Controller
-              control={control}
-              name="newPassword"
-              render={({ field: { onChange, value } }) => (
-                <TextInput
-                  style={[styles.input, errors.newPassword && styles.inputError]}
-                  placeholder="Digite sua nova senha"
-                  placeholderTextColor="#666"
-                  value={value}
-                  onChangeText={onChange}
-                  secureTextEntry
+            <View style={styles.passwordContainer}>
+              <Controller
+                control={control}
+                name="newPassword"
+                render={({ field: { onChange, value } }) => (
+                  <TextInput
+                    style={[styles.input, styles.passwordInput, errors.newPassword && styles.inputError]}
+                    placeholder="Digite sua nova senha"
+                    placeholderTextColor="#666"
+                    value={value}
+                    onChangeText={onChange}
+                    secureTextEntry={!showNewPassword}
+                  />
+                )}
+              />
+              <TouchableOpacity
+                style={styles.eyeIcon}
+                onPress={() => setShowNewPassword(!showNewPassword)}
+              >
+                <Ionicons
+                  name={showNewPassword ? 'eye-off' : 'eye'}
+                  size={24}
+                  color="#666"
                 />
-              )}
-            />
+              </TouchableOpacity>
+            </View>
             {errors.newPassword && (
               <Text style={styles.errorText}>{errors.newPassword.message}</Text>
             )}
@@ -92,20 +120,32 @@ export default function ChangePassword() {
 
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Confirmar Nova Senha</Text>
-            <Controller
-              control={control}
-              name="confirmPassword"
-              render={({ field: { onChange, value } }) => (
-                <TextInput
-                  style={[styles.input, errors.confirmPassword && styles.inputError]}
-                  placeholder="Confirme sua nova senha"
-                  placeholderTextColor="#666"
-                  value={value}
-                  onChangeText={onChange}
-                  secureTextEntry
+            <View style={styles.passwordContainer}>
+              <Controller
+                control={control}
+                name="confirmPassword"
+                render={({ field: { onChange, value } }) => (
+                  <TextInput
+                    style={[styles.input, styles.passwordInput, errors.confirmPassword && styles.inputError]}
+                    placeholder="Confirme sua nova senha"
+                    placeholderTextColor="#666"
+                    value={value}
+                    onChangeText={onChange}
+                    secureTextEntry={!showConfirmPassword}
+                  />
+                )}
+              />
+              <TouchableOpacity
+                style={styles.eyeIcon}
+                onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+              >
+                <Ionicons
+                  name={showConfirmPassword ? 'eye-off' : 'eye'}
+                  size={24}
+                  color="#666"
                 />
-              )}
-            />
+              </TouchableOpacity>
+            </View>
             {errors.confirmPassword && (
               <Text style={styles.errorText}>{errors.confirmPassword.message}</Text>
             )}
@@ -124,15 +164,11 @@ export default function ChangePassword() {
           </TouchableOpacity>
         </View>
       </View>
-    </View>
+    </Container>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
   content: {
     flex: 1,
     padding: 24,
@@ -187,5 +223,17 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  passwordContainer: {
+    position: 'relative',
+  },
+  passwordInput: {
+    paddingRight: 48,
+  },
+  eyeIcon: {
+    position: 'absolute',
+    right: 16,
+    top: '50%',
+    transform: [{ translateY: -12 }],
   },
 }); 

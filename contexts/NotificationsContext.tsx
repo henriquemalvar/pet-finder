@@ -5,7 +5,7 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
 
 interface Notification {
   id: string;
-  type: 'message' | 'match' | 'like' | 'comment';
+  type: 'found' | 'lost' | 'adoption';
   title: string;
   message: string;
   time: string;
@@ -14,7 +14,7 @@ interface Notification {
 
 interface NotificationData {
   id: string;
-  type: 'message' | 'match' | 'like' | 'comment';
+  type: 'found' | 'lost' | 'adoption';
   title: string;
   body: string;
 }
@@ -35,36 +35,44 @@ const NotificationsContext = createContext<NotificationsContextData>({} as Notif
 const mockNotifications: Notification[] = [
   {
     id: '1',
-    type: 'message',
-    title: 'Nova mensagem',
-    message: 'João enviou uma mensagem sobre o seu pet',
+    type: 'found',
+    title: 'Pet encontrado!',
+    message: 'Um cachorro da raça Golden Retriever foi encontrado próximo ao Parque Central',
     time: '5 min atrás',
     read: false,
   },
   {
     id: '2',
-    type: 'match',
-    title: 'Novo match!',
-    message: 'Seu pet é compatível com o pet de Maria',
+    type: 'lost',
+    title: 'Alerta de pet perdido',
+    message: 'Um gato siamês foi reportado como perdido na Rua das Flores',
     time: '1 hora atrás',
     read: false,
   },
   {
     id: '3',
-    type: 'like',
-    title: 'Novo like',
-    message: 'Ana curtiu a foto do seu pet',
+    type: 'adoption',
+    title: 'Novo pet para adoção',
+    message: 'Um filhote de Labrador está disponível para adoção responsável',
     time: '2 horas atrás',
     read: true,
   },
   {
     id: '4',
-    type: 'comment',
-    title: 'Novo comentário',
-    message: 'Pedro comentou: "Que pet lindo!"',
+    type: 'found',
+    title: 'Pet encontrado!',
+    message: 'Um gato preto foi encontrado no bairro Jardim América',
     time: '3 horas atrás',
     read: true,
   },
+  {
+    id: '5',
+    type: 'adoption',
+    title: 'Novo pet para adoção',
+    message: 'Uma gatinha de 2 meses está procurando um lar amoroso',
+    time: '5 horas atrás',
+    read: true,
+  }
 ];
 
 // Função para validar os dados da notificação
@@ -74,7 +82,7 @@ function isValidNotificationData(data: unknown): data is NotificationData {
   const notification = data as NotificationData;
   return (
     typeof notification.id === 'string' &&
-    ['message', 'match', 'like', 'comment'].includes(notification.type) &&
+    ['found', 'lost', 'adoption'].includes(notification.type) &&
     typeof notification.title === 'string' &&
     typeof notification.body === 'string'
   );
@@ -116,17 +124,14 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
     markAsRead(notification.id);
     
     switch (notification.type) {
-      case 'message':
-        router.push('/user/edit-profile');
+      case 'found':
+        router.push('/pet/found');
         break;
-      case 'match':
-        router.push('/pet/index');
+      case 'lost':
+        router.push('/pet/lost');
         break;
-      case 'like':
-        router.push('/user/edit-profile');
-        break;
-      case 'comment':
-        router.push('/post/index');
+      case 'adoption':
+        router.push('/pet/adoption');
         break;
     }
   }, [markAsRead]);
@@ -161,17 +166,14 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
         markAsRead(data.id);
         
         switch (data.type) {
-          case 'message':
-            router.push('/user/edit-profile');
+          case 'found':
+            router.push('/pet/found');
             break;
-          case 'match':
-            router.push('/pet/index');
+          case 'lost':
+            router.push('/pet/lost');
             break;
-          case 'like':
-            router.push('/user/edit-profile');
-            break;
-          case 'comment':
-            router.push('/post/index');
+          case 'adoption':
+            router.push('/pet/adoption');
             break;
         }
       }

@@ -1,28 +1,25 @@
-import { PostCardSkeleton } from '@/components/skeletons/PostCardSkeleton';
+import { Container } from '@/components/ui/Container';
 import { ListState } from '@/components/ui/ListState';
 import { showToast } from '@/components/ui/Toast';
 import { useAuth } from '@hooks/useAuth';
 import { Redirect } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator } from 'react-native';
 
 export default function Index() {
   const { user, loading: authLoading } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [showSkeleton, setShowSkeleton] = useState(true);
 
   const initialize = async () => {
     try {
       setError(null);
       // Aqui você pode adicionar qualquer lógica de inicialização necessária
-      setShowSkeleton(false);
       setLoading(false);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Erro ao inicializar o aplicativo';
       setError(errorMessage);
       showToast.error('Erro', errorMessage);
-      setShowSkeleton(false);
       setLoading(false);
     }
   };
@@ -31,51 +28,28 @@ export default function Index() {
     initialize();
   }, []);
   
-  if (loading || authLoading || showSkeleton) {
+  if (loading || authLoading) {
     return (
-      <View style={styles.container}>
-        {showSkeleton ? (
-          <View style={styles.skeletonContainer}>
-            {[...Array(3)].map((_, i) => (
-              <PostCardSkeleton key={i} />
-            ))}
-          </View>
-        ) : (
-          <ActivityIndicator size="large" color="#007AFF" />
-        )}
-      </View>
+      <Container>
+        <ActivityIndicator size="large" color="#007AFF" />
+      </Container>
     );
   }
 
   if (error) {
     return (
-      <View style={styles.container}>
+      <Container>
         <ListState 
           type="error" 
           message="Não foi possível inicializar o aplicativo. Tente novamente mais tarde."
           onRetry={() => {
             setLoading(true);
-            setShowSkeleton(true);
             initialize();
           }}
         />
-      </View>
+      </Container>
     );
   }
   
   return <Redirect href={user ? "/(tabs)" : "/auth"} />;
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f5f5f5',
-  },
-  skeletonContainer: {
-    width: '100%',
-    padding: 16,
-    gap: 16,
-  },
-}); 
+} 

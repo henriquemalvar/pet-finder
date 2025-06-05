@@ -1,14 +1,12 @@
 import { PetImage } from '@/components/PetImage';
-import { PetDetailsSkeleton } from '@/components/skeletons/PetDetailsSkeleton';
-import { Header } from '@/components/ui/Header';
 import { showToast } from '@/components/ui/Toast';
+import { petsService } from '@/services/petsService';
 import { Pet, PetGender, PetSize, PetType } from '@/types/database';
 import { getPetGenderLabel, getPetSizeLabel, getPetTypeLabel } from '@/utils/pet';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { petsService } from '@services/pets';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function PetDetails() {
@@ -22,16 +20,16 @@ export default function PetDetails() {
   const loadPet = useCallback(async () => {
     try {
       if (!id) return;
-      console.log('Carregando pet com ID:', id);
       const data = await petsService.getById(id);
-      console.log('Dados do pet recebidos:', data);
       const petData = {
         ...data,
         type: data.type as PetType
       };
       setPet(petData);
+      
+      // Atualizar o título da tela com o nome do pet
+      router.setParams({ name: petData.name });
     } catch (error) {
-      console.error('Erro ao carregar pet:', error);
       const errorMessage = error instanceof Error ? error.message : 'Erro ao carregar pet';
       showToast.error('Erro', errorMessage);
       router.back();
@@ -42,7 +40,6 @@ export default function PetDetails() {
 
   useEffect(() => {
     if (!id) {
-      console.log('ID não encontrado nos parâmetros');
       setError('ID do pet não encontrado');
       setLoading(false);
       return;
@@ -52,19 +49,18 @@ export default function PetDetails() {
   }, [id, loadPet]);
 
   if (loading) {
-    console.log('Renderizando loading...');
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
-        <Header title="Detalhes do Pet" showBackButton />
-        <PetDetailsSkeleton />
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#007AFF" />
+        </View>
       </SafeAreaView>
     );
   }
 
   if (error || !pet) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
-        <Header title="Detalhes do Pet" showBackButton />
+      <SafeAreaView style={styles.container}>
         <View style={styles.centered}>
           <Text style={styles.errorText}>{error || 'Pet não encontrado'}</Text>
         </View>
@@ -73,8 +69,7 @@ export default function PetDetails() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <Header title="Detalhes do Pet" showBackButton />
+    <SafeAreaView style={styles.container}>
       <ScrollView style={styles.content} contentContainerStyle={{ paddingBottom: 32 }}>
         <View style={styles.imageWrapper}>
           <PetImage pet={pet} />
@@ -287,5 +282,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
     marginHorizontal: 16,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 }); 

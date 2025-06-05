@@ -1,15 +1,13 @@
-import { PostDetailsSkeleton } from '@/components/skeletons/PostDetailsSkeleton';
-import { Header } from '@/components/ui/Header';
+import { Container } from '@/components/ui/Container';
 import { ImageHeader } from '@/components/ui/ImageHeader';
 import { InfoGrid } from '@/components/ui/InfoGrid';
 import { showToast } from '@/components/ui/Toast';
+import { Post, postsService } from '@/services/postsService';
 import { getPetGenderLabel, getPetSizeLabel, getPetTypeLabel, getPostTypeLabel } from '@/utils/pet';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Post, postsService } from '@services/posts';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Container } from '@/components/ui/Container';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 export default function PostDetails() {
   const params = useLocalSearchParams();
@@ -45,17 +43,17 @@ export default function PostDetails() {
 
   if (loading) {
     return (
-      <Container edges={['top']}>
-        <Header title="Detalhes do Post" showBackButton />
-        <PostDetailsSkeleton />
+      <Container>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#007AFF" />
+        </View>
       </Container>
     );
   }
 
   if (error || !post) {
     return (
-      <Container edges={['top']}>
-        <Header title="Detalhes do Post" showBackButton />
+      <Container>
         <View style={styles.centered}>
           <Text style={styles.errorText}>{error || 'Post não encontrado'}</Text>
         </View>
@@ -64,8 +62,7 @@ export default function PostDetails() {
   }
 
   return (
-    <Container edges={['top']}>
-      <Header title="Detalhes do Post" showBackButton />
+    <Container>
       <ScrollView style={styles.content} contentContainerStyle={{ paddingBottom: 32 }}>
         <ImageHeader
           imageUrl={post.pet.image}
@@ -237,5 +234,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
     marginHorizontal: 16,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 }); 

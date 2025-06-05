@@ -1,18 +1,15 @@
 import { PetListTile } from '@/components/PetListTile';
-import { PetListTileSkeleton } from '@/components/skeletons/PetListTileSkeleton';
-import { PostEditSkeleton } from '@/components/skeletons/PostEditSkeleton';
-import { Header } from '@/components/ui/Header';
 import { showToast } from '@/components/ui/Toast';
-import { Post as DatabasePost, Pet, PostType } from '@/types/database';
+import { petsService } from '@/services/petsService';
+import { postsService } from '@/services/postsService';
+import { Post as DatabasePost, Pet, PostStatus, PostType } from '@/types/database';
 import { Ionicons } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '@hooks/useAuth';
-import { petsService } from '@services/pets';
-import { postsService } from '@services/posts';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { KeyboardAvoidingView, Platform, RefreshControl, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, KeyboardAvoidingView, Platform, RefreshControl, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { z } from 'zod';
 
@@ -129,7 +126,7 @@ export default function EditPost() {
       await postsService.update(id, {
         type: data.type,
         location: data.location,
-        status: 'ACTIVE',
+        status: PostStatus.ACTIVE,
       });
       showToast.success('Sucesso', 'Post atualizado com sucesso');
       router.back();
@@ -150,15 +147,15 @@ export default function EditPost() {
   if (loading) {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
-        <Header title="Editar Post" showBackButton />
-        <PostEditSkeleton />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#007AFF" />
+        </View>
       </SafeAreaView>
     );
   }
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <Header title="Editar Post" showBackButton />
       <KeyboardAvoidingView 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoidingView}
@@ -222,9 +219,7 @@ export default function EditPost() {
                 <View style={styles.petsListContainer}>
                   {loadingPets ? (
                     <View style={styles.petsListContent}>
-                      <PetListTileSkeleton />
-                      <PetListTileSkeleton />
-                      <PetListTileSkeleton />
+                      <ActivityIndicator size="large" color="#007AFF" />
                     </View>
                   ) : error ? (
                     <View style={styles.errorContainer}>
@@ -516,5 +511,10 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 }); 

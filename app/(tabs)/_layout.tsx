@@ -1,11 +1,39 @@
+import { useNotifications } from '@/contexts/NotificationsContext';
 import { Ionicons } from '@expo/vector-icons';
-import { Tabs } from 'expo-router';
+import { Tabs, useRouter } from 'expo-router';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
 export default function TabsLayout() {
+  const router = useRouter();
+  const { hasUnreadNotifications } = useNotifications();
+
   return (
     <Tabs
       screenOptions={{
-        headerShown: false
+        headerShown: true,
+        headerTitle: 'Pet Finder',
+        headerTintColor: '#000',
+        headerStyle: {
+          backgroundColor: '#fff',
+        },
+        headerTitleStyle: {
+          color: '#000',
+        },
+        headerRight: () => (
+          <TouchableOpacity
+            onPress={() => router.push('/notifications')}
+            style={styles.notificationButton}
+          >
+            <Ionicons 
+              name={hasUnreadNotifications ? "notifications" : "notifications-outline"} 
+              size={24} 
+              color="#000" 
+            />
+            {hasUnreadNotifications && (
+              <View style={styles.badge} />
+            )}
+          </TouchableOpacity>
+        ),
       }}
     >
       <Tabs.Screen
@@ -46,4 +74,20 @@ export default function TabsLayout() {
       />
     </Tabs>
   );
-} 
+}
+
+const styles = StyleSheet.create({
+  notificationButton: {
+    marginRight: 16,
+    position: 'relative',
+  },
+  badge: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#FF3B30',
+  },
+}); 

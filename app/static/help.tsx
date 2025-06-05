@@ -1,5 +1,4 @@
 import { Container } from '@/components/ui/Container';
-import { Header } from '@/components/ui/Header';
 import { Ionicons } from '@expo/vector-icons';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -90,8 +89,7 @@ const SocialSection = () => (
 
 export default function Help() {
   return (
-    <Container edges={['top']}>
-      <Header title="Ajuda" showBackButton />
+    <Container>
       <ScrollView style={styles.content}>
         <FAQSection />
         <ContactSection />

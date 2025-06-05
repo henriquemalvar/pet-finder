@@ -1,8 +1,7 @@
+import { Container } from '@/components/ui/Container';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
-import { Header } from '@/components/ui/Header';
-import { Container } from '@/components/ui/Container';
 
 export default function Notifications() {
   const [emailNotifications, setEmailNotifications] = useState(true);
@@ -12,9 +11,7 @@ export default function Notifications() {
   const [updates, setUpdates] = useState(true);
 
   return (
-    <Container edges={['top']}>
-      <Header title="Notificações" showBackButton />
-
+    <Container>
       <ScrollView style={styles.content}>
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Canais</Text>
