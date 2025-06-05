@@ -4,9 +4,20 @@ import { Ionicons } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '@hooks/useAuth';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { ActivityIndicator, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { z } from 'zod';
 
 const loginSchema = z.object({
@@ -21,8 +32,14 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login, user, loading: authLoading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.replace('/(tabs)');
+    }
+  }, [user, authLoading]);
 
   const { control, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -41,101 +58,135 @@ export default function Login() {
     }
   };
 
+  if (authLoading) {
+    return (
+      <SafeAreaView style={[styles.safeArea, styles.loadingContainer]}>
+        <ActivityIndicator size="large" color="#007AFF" />
+      </SafeAreaView>
+    );
+  }
+
   return (
-    <KeyboardAvoidingView 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-    >
-      <View style={styles.header}>
-        <Logo size="medium" />
-        <Text style={styles.title}>Bem-vindo de volta!</Text>
-        <Text style={styles.subtitle}>Entre para continuar</Text>
-      </View>
-
-      <View style={styles.form}>
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>E-mail</Text>
-          <Controller
-            control={control}
-            name="email"
-            render={({ field: { onChange, value } }) => (
-              <TextInput
-                style={[styles.input, errors.email && styles.inputError]}
-                placeholder="Seu e-mail"
-                placeholderTextColor="#666"
-                value={value}
-                onChangeText={onChange}
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
-            )}
-          />
-          {errors.email && (
-            <Text style={styles.errorText}>{errors.email.message}</Text>
-          )}
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Senha</Text>
-          <View style={styles.passwordContainer}>
-            <Controller
-              control={control}
-              name="password"
-              render={({ field: { onChange, value } }) => (
-                <TextInput
-                  style={[styles.input, styles.passwordInput, errors.password && styles.inputError]}
-                  placeholder="Sua senha"
-                  placeholderTextColor="#666"
-                  value={value}
-                  onChangeText={onChange}
-                  secureTextEntry={!showPassword}
-                />
-              )}
-            />
-            <TouchableOpacity
-              style={styles.eyeIcon}
-              onPress={() => setShowPassword(!showPassword)}
-            >
-              <Ionicons
-                name={showPassword ? 'eye-off' : 'eye'}
-                size={24}
-                color="#666"
-              />
-            </TouchableOpacity>
-          </View>
-          {errors.password && (
-            <Text style={styles.errorText}>{errors.password.message}</Text>
-          )}
-        </View>
-
-        <TouchableOpacity 
-          style={[styles.button, isSubmitting && styles.buttonDisabled]} 
-          onPress={handleSubmit(onSubmit)}
-          disabled={isSubmitting}
+    <SafeAreaView style={styles.safeArea}>
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardAvoid}
+      >
+        <ScrollView 
+          style={styles.container} 
+          contentContainerStyle={styles.contentContainer}
+          keyboardShouldPersistTaps="handled"
         >
-          {isSubmitting ? (
-            <ActivityIndicator size="small" color="#fff" />
-          ) : (
-            <Text style={styles.buttonText}>Entrar</Text>
-          )}
-        </TouchableOpacity>
+          <View style={styles.content}>
+            <View style={styles.header}>
+              <Logo size="medium" />
+              <Text style={styles.title}>Bem-vindo de volta!</Text>
+              <Text style={styles.subtitle}>Entre para continuar</Text>
+            </View>
 
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>Não tem uma conta? </Text>
-          <TouchableOpacity onPress={() => router.push('/auth/register')}>
-            <Text style={styles.footerLink}>Cadastre-se</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </KeyboardAvoidingView>
+            <View style={styles.form}>
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>E-mail</Text>
+                <Controller
+                  control={control}
+                  name="email"
+                  render={({ field: { onChange, value } }) => (
+                    <TextInput
+                      style={[styles.input, errors.email && styles.inputError]}
+                      placeholder="Seu e-mail"
+                      placeholderTextColor="#666"
+                      value={value}
+                      onChangeText={onChange}
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                    />
+                  )}
+                />
+                {errors.email && (
+                  <Text style={styles.errorText}>{errors.email.message}</Text>
+                )}
+              </View>
+
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Senha</Text>
+                <View style={styles.passwordContainer}>
+                  <Controller
+                    control={control}
+                    name="password"
+                    render={({ field: { onChange, value } }) => (
+                      <TextInput
+                        style={[styles.input, styles.passwordInput, errors.password && styles.inputError]}
+                        placeholder="Sua senha"
+                        placeholderTextColor="#666"
+                        value={value}
+                        onChangeText={onChange}
+                        secureTextEntry={!showPassword}
+                      />
+                    )}
+                  />
+                  <TouchableOpacity
+                    style={styles.eyeIcon}
+                    onPress={() => setShowPassword(!showPassword)}
+                  >
+                    <Ionicons
+                      name={showPassword ? 'eye-off' : 'eye'}
+                      size={24}
+                      color="#666"
+                    />
+                  </TouchableOpacity>
+                </View>
+                {errors.password && (
+                  <Text style={styles.errorText}>{errors.password.message}</Text>
+                )}
+              </View>
+
+              <TouchableOpacity 
+                style={[styles.button, isSubmitting && styles.buttonDisabled]} 
+                onPress={handleSubmit(onSubmit)}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <Text style={styles.buttonText}>Entrar</Text>
+                )}
+              </TouchableOpacity>
+
+              <View style={styles.footer}>
+                <Text style={styles.footerText}>Não tem uma conta? </Text>
+                <TouchableOpacity onPress={() => router.push('/auth/register')}>
+                  <Text style={styles.footerLink}>Cadastre-se</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  keyboardAvoid: {
+    flex: 1,
+  },
   container: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+  contentContainer: {
+    flexGrow: 1,
+  },
+  content: {
     padding: 24,
+  },
+  loadingContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   header: {
     alignItems: 'center',
@@ -175,6 +226,9 @@ const styles = StyleSheet.create({
     color: '#1a1a1a',
     backgroundColor: '#f8f9fa',
   },
+  inputError: {
+    borderColor: '#FF3B30',
+  },
   passwordContainer: {
     position: 'relative',
   },
@@ -186,9 +240,6 @@ const styles = StyleSheet.create({
     right: 16,
     top: '50%',
     transform: [{ translateY: -12 }],
-  },
-  inputError: {
-    borderColor: '#FF3B30',
   },
   errorText: {
     color: '#FF3B30',

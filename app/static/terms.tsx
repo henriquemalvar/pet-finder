@@ -54,7 +54,7 @@ export default function Terms() {
           </Text>
         </View>
 
-        <View style={styles.section}>
+        <View style={[styles.section, { paddingBottom: 24 }]}>
           <Text style={styles.title}>8. Contato</Text>
           <Text style={styles.text}>
             Se você tiver alguma dúvida sobre estes termos, entre em contato conosco através do e-mail: suporte@pet-finder.com

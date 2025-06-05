@@ -77,6 +77,8 @@ export interface Pet {
   castrated: boolean;
   vaccinated: boolean;
   location: string;
+  latitude: number;
+  longitude: number;
   createdAt: Date;
   updatedAt: Date;
   userId: string;

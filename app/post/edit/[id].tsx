@@ -2,7 +2,7 @@ import { PetListTile } from '@/components/PetListTile';
 import { showToast } from '@/components/ui/Toast';
 import { petsService } from '@/services/petsService';
 import { postsService } from '@/services/postsService';
-import { Post as DatabasePost, Pet, PostStatus, PostType } from '@/types/database';
+import { Post as DatabasePost, Pet, PostType } from '@/types/database';
 import { Ionicons } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '@hooks/useAuth';
@@ -16,9 +16,8 @@ import { z } from 'zod';
 const postSchema = z.object({
   petId: z.string().min(1, 'Selecione um pet'),
   type: z.nativeEnum(PostType),
-  location: z.string().min(1, 'Localização é obrigatória'),
   title: z.string().min(1, 'Título é obrigatório'),
-  description: z.string().min(1, 'Descrição é obrigatória'),
+  content: z.string().min(10, 'A descrição deve ter pelo menos 10 caracteres'),
   contact: z.string().min(1, 'Contato é obrigatório'),
 });
 
@@ -46,9 +45,8 @@ export default function EditPost() {
     defaultValues: {
       petId: '',
       type: PostType.ADOPTION,
-      location: '',
       title: '',
-      description: '',
+      content: '',
       contact: '',
     }
   });
@@ -59,9 +57,8 @@ export default function EditPost() {
       const post = await postsService.getById(id) as unknown as DatabasePost;
       setValue('petId', post.petId);
       setValue('type', post.type);
-      setValue('location', post.location);
       setValue('title', post.title);
-      setValue('description', post.content);
+      setValue('content', post.content);
       setValue('contact', post.user.contactPreference || '');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Erro ao carregar post';
@@ -123,10 +120,16 @@ export default function EditPost() {
   const onSubmit = async (data: PostFormData) => {
     try {
       setLoading(true);
+      const selectedPet = pets.find(pet => pet.id === data.petId);
+      
+      if (!selectedPet) {
+        throw new Error('Pet não encontrado');
+      }
+
       await postsService.update(id, {
         type: data.type,
-        location: data.location,
-        status: PostStatus.ACTIVE,
+        title: data.title,
+        content: data.content,
       });
       showToast.success('Sucesso', 'Post atualizado com sucesso');
       router.back();
@@ -160,206 +163,186 @@ export default function EditPost() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoidingView}
       >
-        <ScrollView 
-          style={styles.content}
-          keyboardShouldPersistTaps="handled"
-        >
-          <View style={styles.form}>
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Tipo do Post</Text>
-              <View style={styles.optionsContainer}>
-                {typeOptions.map((option) => (
-                  <Controller
-                    key={option.value}
-                    control={control}
-                    name="type"
-                    render={({ field: { onChange, value } }) => (
-                      <TouchableOpacity
-                        style={[
-                          styles.optionButton,
-                          value === option.value && styles.optionButtonSelected,
-                        ]}
-                        onPress={() => onChange(option.value)}
-                      >
-                        <Ionicons 
-                          name={option.icon as any} 
-                          size={24} 
-                          color={value === option.value ? '#fff' : '#666'} 
-                          style={styles.optionIcon}
-                        />
-                        <Text
+        <View style={styles.content}>
+          <ScrollView 
+            style={styles.scrollView}
+            contentContainerStyle={styles.scrollViewContent}
+            keyboardShouldPersistTaps="handled"
+          >
+            <View style={styles.form}>
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Tipo do Post</Text>
+                <View style={styles.optionsContainer}>
+                  {typeOptions.map((option) => (
+                    <Controller
+                      key={option.value}
+                      control={control}
+                      name="type"
+                      render={({ field: { onChange, value } }) => (
+                        <TouchableOpacity
                           style={[
-                            styles.optionText,
-                            value === option.value && styles.optionTextSelected,
+                            styles.optionButton,
+                            value === option.value && styles.optionButtonSelected,
                           ]}
+                          onPress={() => onChange(option.value)}
                         >
-                          {option.label}
-                        </Text>
-                      </TouchableOpacity>
-                    )}
-                  />
-                ))}
+                          <Ionicons 
+                            name={option.icon as any} 
+                            size={24} 
+                            color={value === option.value ? '#fff' : '#666'} 
+                            style={styles.optionIcon}
+                          />
+                          <Text
+                            style={[
+                              styles.optionText,
+                              value === option.value && styles.optionTextSelected,
+                            ]}
+                          >
+                            {option.label}
+                          </Text>
+                        </TouchableOpacity>
+                      )}
+                    />
+                  ))}
+                </View>
+                {errors.type && (
+                  <Text style={styles.errorText}>{errors.type.message}</Text>
+                )}
               </View>
-              {errors.type && (
-                <Text style={styles.errorText}>{errors.type.message}</Text>
-              )}
-            </View>
 
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Selecione um Pet</Text>
-              <View style={styles.petsSection}>
-                <TouchableOpacity
-                  style={[styles.optionButton, styles.createPetButton]}
-                  onPress={handleCreatePet}
-                >
-                  <Ionicons name="add-circle" size={24} color="#007AFF" style={styles.optionIcon} />
-                  <Text style={styles.createPetText}>Adicionar Novo Pet</Text>
-                </TouchableOpacity>
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Título</Text>
+                <Controller
+                  control={control}
+                  name="title"
+                  render={({ field: { onChange, value } }) => (
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Digite o título"
+                      value={value}
+                      onChangeText={onChange}
+                    />
+                  )}
+                />
+                {errors.title && (
+                  <Text style={styles.errorText}>{errors.title.message}</Text>
+                )}
+              </View>
 
-                <View style={styles.petsListContainer}>
-                  {loadingPets ? (
-                    <View style={styles.petsListContent}>
-                      <ActivityIndicator size="large" color="#007AFF" />
-                    </View>
-                  ) : error ? (
-                    <View style={styles.errorContainer}>
-                      <Text style={styles.errorText}>{error}</Text>
-                      <TouchableOpacity 
-                        style={styles.retryButton}
-                        onPress={loadPets}
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Descrição</Text>
+                <Controller
+                  control={control}
+                  name="content"
+                  render={({ field: { onChange, value } }) => (
+                    <TextInput
+                      style={[styles.input, styles.textArea]}
+                      placeholder="Digite a descrição"
+                      value={value}
+                      onChangeText={onChange}
+                      multiline
+                      numberOfLines={4}
+                      textAlignVertical="top"
+                    />
+                  )}
+                />
+                {errors.content && (
+                  <Text style={styles.errorText}>{errors.content.message}</Text>
+                )}
+              </View>
+
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Contato</Text>
+                <Controller
+                  control={control}
+                  name="contact"
+                  render={({ field: { onChange, value } }) => (
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Digite o contato"
+                      value={value}
+                      onChangeText={onChange}
+                    />
+                  )}
+                />
+                {errors.contact && (
+                  <Text style={styles.errorText}>{errors.contact.message}</Text>
+                )}
+              </View>
+
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Selecione um Pet</Text>
+                <View style={styles.petsSection}>
+                  <TouchableOpacity
+                    style={[styles.optionButton, styles.createPetButton]}
+                    onPress={handleCreatePet}
+                  >
+                    <Ionicons name="add-circle" size={24} color="#007AFF" style={styles.optionIcon} />
+                    <Text style={styles.createPetText}>Adicionar Novo Pet</Text>
+                  </TouchableOpacity>
+
+                  <View style={styles.petsListContainer}>
+                    {loadingPets ? (
+                      <View style={styles.petsListContent}>
+                        <ActivityIndicator size="large" color="#007AFF" />
+                      </View>
+                    ) : error ? (
+                      <View style={styles.errorContainer}>
+                        <Text style={styles.errorText}>{error}</Text>
+                        <TouchableOpacity 
+                          style={styles.retryButton}
+                          onPress={loadPets}
+                        >
+                          <Text style={styles.retryButtonText}>Tentar novamente</Text>
+                        </TouchableOpacity>
+                      </View>
+                    ) : !pets || pets.length === 0 ? (
+                      <View style={styles.emptyContainer}>
+                        <Text style={styles.emptyText}>Você ainda não tem pets cadastrados</Text>
+                      </View>
+                    ) : (
+                      <ScrollView 
+                        style={styles.petsList}
+                        contentContainerStyle={styles.petsListContent}
+                        showsVerticalScrollIndicator={true}
+                        nestedScrollEnabled={true}
+                        refreshControl={
+                          <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={onRefresh}
+                            colors={['#007AFF']}
+                            tintColor="#007AFF"
+                          />
+                        }
                       >
-                        <Text style={styles.retryButtonText}>Tentar novamente</Text>
-                      </TouchableOpacity>
-                    </View>
-                  ) : !pets || pets.length === 0 ? (
-                    <View style={styles.emptyContainer}>
-                      <Text style={styles.emptyText}>Você ainda não tem pets cadastrados</Text>
-                    </View>
-                  ) : (
-                    <ScrollView 
-                      style={styles.petsList}
-                      contentContainerStyle={styles.petsListContent}
-                      showsVerticalScrollIndicator={true}
-                      nestedScrollEnabled={true}
-                      refreshControl={
-                        <RefreshControl
-                          refreshing={refreshing}
-                          onRefresh={onRefresh}
-                          colors={['#007AFF']}
-                          tintColor="#007AFF"
-                        />
-                      }
-                    >
-                      {pets.map((pet) => (
-                        <Controller
-                          key={pet.id}
-                          control={control}
-                          name="petId"
-                          render={({ field: { onChange, value } }) => (
-                            <TouchableOpacity
-                              style={[
-                                styles.petOption,
-                                value === pet.id && styles.petOptionSelected,
-                              ]}
-                              onPress={() => onChange(pet.id)}
-                            >
+                        {pets.map((pet) => (
+                          <Controller
+                            key={pet.id}
+                            control={control}
+                            name="petId"
+                            render={({ field: { onChange, value } }) => (
                               <PetListTile
                                 pet={pet}
                                 showActions={false}
                                 disableNavigation={true}
+                                selected={value === pet.id}
+                                onPress={() => onChange(pet.id)}
                               />
-                            </TouchableOpacity>
-                          )}
-                        />
-                      ))}
-                    </ScrollView>
-                  )}
+                            )}
+                          />
+                        ))}
+                      </ScrollView>
+                    )}
+                  </View>
                 </View>
                 {errors.petId && (
                   <Text style={styles.errorText}>{errors.petId.message}</Text>
                 )}
               </View>
             </View>
+          </ScrollView>
 
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Localização</Text>
-              <Controller
-                control={control}
-                name="location"
-                render={({ field: { onChange, value } }) => (
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Digite a localização"
-                    value={value}
-                    onChangeText={onChange}
-                  />
-                )}
-              />
-              {errors.location && (
-                <Text style={styles.errorText}>{errors.location.message}</Text>
-              )}
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Título</Text>
-              <Controller
-                control={control}
-                name="title"
-                render={({ field: { onChange, value } }) => (
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Digite o título"
-                    value={value}
-                    onChangeText={onChange}
-                  />
-                )}
-              />
-              {errors.title && (
-                <Text style={styles.errorText}>{errors.title.message}</Text>
-              )}
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Descrição</Text>
-              <Controller
-                control={control}
-                name="description"
-                render={({ field: { onChange, value } }) => (
-                  <TextInput
-                    style={[styles.input, styles.textArea]}
-                    placeholder="Digite a descrição"
-                    value={value}
-                    onChangeText={onChange}
-                    multiline
-                    numberOfLines={4}
-                    textAlignVertical="top"
-                  />
-                )}
-              />
-              {errors.description && (
-                <Text style={styles.errorText}>{errors.description.message}</Text>
-              )}
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Contato</Text>
-              <Controller
-                control={control}
-                name="contact"
-                render={({ field: { onChange, value } }) => (
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Digite o contato"
-                    value={value}
-                    onChangeText={onChange}
-                  />
-                )}
-              />
-              {errors.contact && (
-                <Text style={styles.errorText}>{errors.contact.message}</Text>
-              )}
-            </View>
-
+          <View style={styles.footer}>
             <TouchableOpacity
               style={[styles.submitButton, loading && styles.submitButtonDisabled]}
               onPress={handleSubmit(onSubmit)}
@@ -370,7 +353,7 @@ export default function EditPost() {
               </Text>
             </TouchableOpacity>
           </View>
-        </ScrollView>
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -387,8 +370,20 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
   },
+  scrollView: {
+    flex: 1,
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+  },
   form: {
     padding: 16,
+  },
+  footer: {
+    padding: 16,
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
   },
   inputContainer: {
     marginBottom: 16,
@@ -502,7 +497,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 16,
     alignItems: 'center',
-    marginTop: 16,
   },
   submitButtonDisabled: {
     opacity: 0.5,

@@ -25,7 +25,7 @@ export function Logo({ size = 'medium', variant = 'primary' }: LogoProps) {
     <View style={[styles.container, { width: containerSize, height: containerSize }]}>
       <View style={[styles.background, { backgroundColor }]}>
         <Image
-          source={require('@assets/images/logo.png')}
+          source={require('@assets/images/logo_bg_transparent.png')}
           style={[styles.logo, { width: logoSize, height: logoSize }]}
           resizeMode="contain"
           tintColor={logoColor}

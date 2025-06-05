@@ -24,9 +24,6 @@ export function ImageHeader({ pet, onClose, badgeText, badgeIcon, badgeColor = '
           style={styles.image} 
         />
       )}
-      <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-        <MaterialCommunityIcons name="close" size={28} color="#222" />
-      </TouchableOpacity>
       <View style={[styles.typeBadge, { backgroundColor: badgeColor }]}>
         <MaterialCommunityIcons name={badgeIcon} size={16} color="#fff" />
         <Text style={styles.typeBadgeText}>{badgeText}</Text>

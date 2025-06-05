@@ -40,12 +40,10 @@ export default function Search() {
   });
 
   useEffect(() => {
-    console.log('Parâmetros recebidos:', params);
     
     if (params.filters) {
       try {
         const parsedFilters = JSON.parse(params.filters) as PostFilters;
-        console.log('Filtros parseados:', parsedFilters);
         
         const formData = {
           search: parsedFilters.search || '',
@@ -55,22 +53,18 @@ export default function Search() {
           petGender: parsedFilters.petGender as PetGender,
         };
         
-        console.log('Dados do formulário a serem aplicados:', formData);
         reset(formData);
-        console.log('Formulário atualizado com os filtros');
       } catch (error) {
         console.error('Erro ao parsear filtros:', error);
         showToast.error('Erro', 'Filtros inválidos');
       }
     } else {
-      console.log('Nenhum filtro recebido');
     }
   }, [params.filters]);
 
   const onSubmit = async (data: SearchFormData) => {
     try {
       setLoading(true);
-      console.log('Submetendo filtros:', data);
       
       const filters: PostFilters = {
         type: data.type as PostTypeValue,
@@ -81,7 +75,6 @@ export default function Search() {
         search: data.search || undefined,
       };
 
-      console.log('Filtros formatados:', filters);
       const response = await postsService.list(filters);
       
       if (response.posts.length === 0) {
@@ -102,7 +95,6 @@ export default function Search() {
   };
 
   const handleClearFilters = () => {
-    console.log('Limpando filtros');
     reset();
     router.push({
       pathname: '/(tabs)',
@@ -152,7 +144,6 @@ export default function Search() {
     watch('petGender')
   );
 
-  console.log('Estado atual do formulário:', watch());
 
   return (
     <Container>

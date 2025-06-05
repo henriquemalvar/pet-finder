@@ -5,14 +5,17 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "petfinder",
-    "userInterfaceStyle": "automatic",
+    "scheme": "pet-finder",
+    "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/images/splash-icon.png",
+      "image": "./assets/images/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.henriquemmalvar.petfinder"
@@ -31,31 +34,7 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
-      "expo-router",
-      [
-        "expo-splash-screen",
-        {
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
-        }
-      ],
-      [
-        "expo-font",
-        {
-          "fonts": [
-            "node_modules/react-native-vector-icons/Fonts/MaterialCommunityIcons.ttf"
-          ]
-        }
-      ],
-      [
-        "expo-image-picker",
-        {
-          "photosPermission": "O aplicativo precisa acessar suas fotos para permitir que você selecione imagens.",
-          "cameraPermission": "O aplicativo precisa acessar sua câmera para permitir que você tire fotos."
-        }
-      ]
+      "expo-router"
     ],
     "experiments": {
       "typedRoutes": true

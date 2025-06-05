@@ -31,8 +31,9 @@ export default function RootLayout() {
                 headerShown: false,
               }}
             >
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="index" options={{ headerShown: false }} />
               <Stack.Screen name="auth" options={{ headerShown: false }} />
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
               
               <Stack.Screen name="static/help" options={{ headerShown: true, headerTitle: 'Ajuda', headerBackTitle: 'Voltar' }} />
               <Stack.Screen name="static/terms" options={{ headerShown: true, headerTitle: 'Termos de Uso', headerBackTitle: 'Voltar' }} />

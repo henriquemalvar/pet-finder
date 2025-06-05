@@ -18,6 +18,7 @@ export interface RegisterData {
 
 // Funções de persistência
 export const getToken = async (): Promise<string | null> => {
+  console.log('[STORAGE] Getting token');
   try {
     const user = await getUser();
     return user?.token || null;
@@ -28,6 +29,7 @@ export const getToken = async (): Promise<string | null> => {
 };
 
 export const getUser = async (): Promise<UserWithToken | null> => {
+  console.log('[STORAGE] Getting user');
   try {
     const userJson = await AsyncStorage.getItem(USER_KEY);
     return userJson ? JSON.parse(userJson) : null;
@@ -38,6 +40,7 @@ export const getUser = async (): Promise<UserWithToken | null> => {
 };
 
 export const saveUser = async (user: UserWithToken): Promise<void> => {
+  console.log('[STORAGE] Saving user');
   try {
     await AsyncStorage.setItem(USER_KEY, JSON.stringify(user));
   } catch (error) {
@@ -47,6 +50,7 @@ export const saveUser = async (user: UserWithToken): Promise<void> => {
 };
 
 export const removeUser = async (): Promise<void> => {
+  console.log('[STORAGE] Removing user');
   try {
     await AsyncStorage.removeItem(USER_KEY);
     await AsyncStorage.removeItem('@token');
@@ -57,6 +61,7 @@ export const removeUser = async (): Promise<void> => {
 };
 
 export const isAuthenticated = async (): Promise<boolean> => {
+  console.log('[STORAGE] Checking authentication');
   try {
     const user = await getUser();
     return !!user;
@@ -69,6 +74,7 @@ export const isAuthenticated = async (): Promise<boolean> => {
 // Serviço de autenticação
 export const authService = {
   login: async (credentials: LoginCredentials): Promise<UserWithToken> => {
+    console.log('[POST] /auth/login');
     const response = await api.post<AuthResponse>('/auth/login', credentials);
 
     if (!response.data.user || !response.data.token) {
@@ -82,6 +88,7 @@ export const authService = {
   },
 
   register: async (data: RegisterData): Promise<UserWithToken> => {
+    console.log('[POST] /auth/register');
     const response = await api.post<AuthResponse>('/auth/register', data);
 
     if (!response.data.user || !response.data.token) {
@@ -95,6 +102,7 @@ export const authService = {
   },
 
   changePassword: async (currentPassword: string, newPassword: string): Promise<void> => {
+    console.log('[POST] /auth/change-password');
     await api.post('/auth/change-password', {
       currentPassword,
       newPassword,

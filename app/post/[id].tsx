@@ -6,9 +6,24 @@ import { postsService } from '@/services/postsService';
 import { PetType, Post } from '@/types/database';
 import { getPetGenderLabel, getPetSizeLabel, getPetTypeLabel, getPostTypeLabel } from '@/utils/pet';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import * as Clipboard from 'expo-clipboard';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
+const formatPhoneNumber = (phone: string) => {
+  // Remove todos os caracteres não numéricos
+  const cleaned = phone.replace(/\D/g, '');
+  
+  // Aplica a máscara (XX) XXXXX-XXXX
+  const match = cleaned.match(/^(\d{2})(\d{5})(\d{4})$/);
+  
+  if (match) {
+    return `(${match[1]}) ${match[2]}-${match[3]}`;
+  }
+  
+  return phone;
+};
 
 export default function PostDetails() {
   const params = useLocalSearchParams();
@@ -17,6 +32,8 @@ export default function PostDetails() {
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [copiedWhatsapp, setCopiedWhatsapp] = useState(false);
+  const [copiedInstagram, setCopiedInstagram] = useState(false);
 
   const loadPost = useCallback(async () => {
     try {
@@ -77,61 +94,108 @@ export default function PostDetails() {
         <View style={styles.headerRow}>
           <View style={styles.badge}><Text style={styles.badgeText}>{getPetTypeLabel(post.pet.type as PetType)}</Text></View>
         </View>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Sobre</Text>
+          {post.content && <Text style={styles.sectionText}>{post.content}</Text>}
+          {post.pet.description && <Text style={styles.sectionText}>{post.pet.description}</Text>}
+        </View>
         <InfoGrid
           items={[
             { icon: 'paw', label: 'Raça', value: post.pet.breed },
             { icon: 'calendar', label: 'Idade', value: `${post.pet.age} anos` },
             { icon: post.pet.gender === 'MALE' ? 'gender-male' : 'gender-female', label: 'Gênero', value: getPetGenderLabel(post.pet.gender) },
             { icon: 'arrow-expand-vertical', label: 'Porte', value: getPetSizeLabel(post.pet.size) },
-            { icon: 'map-marker', label: 'Localização', value: post.location },
+            { icon: 'map-marker', label: 'Localização', value: post.pet.location },
           ]}
         />
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Sobre</Text>
-          {post.content && <Text style={styles.sectionText}>{post.content}</Text>}
-          {post.pet.description && <Text style={styles.sectionText}>{post.pet.description}</Text>}
-        </View>
-        <View style={styles.section}>
           <Text style={styles.sectionTitle}>Informações de Adoção</Text>
-          <View style={styles.adoptionInfoRow}>
-            <MaterialCommunityIcons name="account" size={20} color="#888" />
-            <Text style={styles.adoptionInfoText}>Responsável: {post.user.name}</Text>
+          <View style={styles.gridContainer}>
+            <View style={styles.gridItem}>
+              <MaterialCommunityIcons name="account" size={24} color="#888" />
+              <Text style={styles.gridItemLabel}>Responsável</Text>
+              <Text style={styles.gridItemValue}>{post.user.name}</Text>
+            </View>
+            <View style={styles.gridItem}>
+              <MaterialCommunityIcons name="map-marker" size={24} color="#888" />
+              <Text style={styles.gridItemLabel}>Localização</Text>
+              <Text style={styles.gridItemValue}>{post.pet.location}</Text>
+            </View>
+            <View style={styles.gridItem}>
+              <MaterialCommunityIcons name="calendar-clock" size={24} color="#888" />
+              <Text style={styles.gridItemLabel}>Publicado em</Text>
+              <Text style={styles.gridItemValue}>{new Date(post.createdAt).toLocaleDateString('pt-BR')}</Text>
+            </View>
+            <View style={styles.gridItem}>
+              <MaterialCommunityIcons 
+                name="check-circle" 
+                size={24} 
+                color={post.status === 'ACTIVE' ? '#4CAF50' : '#FF9800'} 
+              />
+              <Text style={styles.gridItemLabel}>Status</Text>
+              <Text style={[
+                styles.gridItemValue,
+                { color: post.status === 'ACTIVE' ? '#4CAF50' : '#FF9800' }
+              ]}>
+                {post.status === 'ACTIVE' ? 'Ativo' : 'Inativo'}
+              </Text>
+            </View>
           </View>
-          <View style={styles.adoptionInfoRow}>
-            <MaterialCommunityIcons name="map-marker" size={20} color="#888" />
-            <Text style={styles.adoptionInfoText}>Localização: {post.location}</Text>
-          </View>
-          <View style={styles.adoptionInfoRow}>
-            <MaterialCommunityIcons name="calendar-clock" size={20} color="#888" />
-            <Text style={styles.adoptionInfoText}>Publicado em: {new Date(post.createdAt).toLocaleDateString('pt-BR')}</Text>
-          </View>
-          <View style={styles.adoptionInfoRow}>
-            <MaterialCommunityIcons name="check-circle" size={20} color={post.status === 'ACTIVE' ? '#4CAF50' : '#FF9800'} />
-            <Text style={styles.adoptionInfoText}>Status: {post.status === 'ACTIVE' ? 'Ativo' : 'Inativo'}</Text>
-          </View>
-          <View style={styles.adoptionInfoRow}>
-            <MaterialCommunityIcons name="needle" size={20} color="#888" />
-            <Text style={styles.adoptionInfoText}>Castrado: {post.pet.castrated ? 'Sim' : 'Não'}</Text>
-          </View>
-          <View style={styles.adoptionInfoRow}>
-            <MaterialCommunityIcons name="medical-bag" size={20} color="#888" />
-            <Text style={styles.adoptionInfoText}>Vacinado: {post.pet.vaccinated ? 'Sim' : 'Não'}</Text>
+          <View style={styles.gridContainer}>
+            <View style={styles.gridItem}>
+              <MaterialCommunityIcons name="needle" size={24} color="#888" />
+              <Text style={styles.gridItemLabel}>Castrado</Text>
+              <Text style={styles.gridItemValue}>{post.pet.castrated ? 'Sim' : 'Não'}</Text>
+            </View>
+            <View style={styles.gridItem}>
+              <MaterialCommunityIcons name="medical-bag" size={24} color="#888" />
+              <Text style={styles.gridItemLabel}>Vacinado</Text>
+              <Text style={styles.gridItemValue}>{post.pet.vaccinated ? 'Sim' : 'Não'}</Text>
+            </View>
           </View>
         </View>
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Contato</Text>
           <View style={styles.contactRow}>
             {post.user.whatsapp && (
-              <View style={styles.contactItem}>
+              <TouchableOpacity 
+                style={styles.contactItem}
+                onPress={async () => {
+                  if (post.user.whatsapp) {
+                    await Clipboard.setStringAsync(post.user.whatsapp);
+                    setCopiedWhatsapp(true);
+                    setTimeout(() => setCopiedWhatsapp(false), 2000);
+                  }
+                }}
+              >
                 <MaterialCommunityIcons name="whatsapp" size={22} color="#25D366" />
-                <Text style={styles.contactText}>{post.user.whatsapp}</Text>
-              </View>
+                <Text style={styles.contactText}>{formatPhoneNumber(post.user.whatsapp)}</Text>
+                <MaterialCommunityIcons 
+                  name={copiedWhatsapp ? "check" : "content-copy"} 
+                  size={16} 
+                  color={copiedWhatsapp ? "#4CAF50" : "#666"} 
+                />
+              </TouchableOpacity>
             )}
             {post.user.instagram && (
-              <View style={styles.contactItem}>
+              <TouchableOpacity 
+                style={styles.contactItem}
+                onPress={async () => {
+                  if (post.user.instagram) {
+                    await Clipboard.setStringAsync(post.user.instagram);
+                    setCopiedInstagram(true);
+                    setTimeout(() => setCopiedInstagram(false), 2000);
+                  }
+                }}
+              >
                 <MaterialCommunityIcons name="instagram" size={22} color="#C13584" />
                 <Text style={styles.contactText}>{post.user.instagram}</Text>
-              </View>
+                <MaterialCommunityIcons 
+                  name={copiedInstagram ? "check" : "content-copy"} 
+                  size={16} 
+                  color={copiedInstagram ? "#4CAF50" : "#666"} 
+                />
+              </TouchableOpacity>
             )}
           </View>
         </View>
@@ -240,5 +304,31 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  gridContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 16,
+    gap: 16,
+  },
+  gridItem: {
+    flex: 1,
+    minWidth: '45%',
+    backgroundColor: '#f8f8f8',
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+    gap: 8,
+  },
+  gridItemLabel: {
+    fontSize: 12,
+    color: '#666',
+    textAlign: 'center',
+  },
+  gridItemValue: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    textAlign: 'center',
   },
 }); 

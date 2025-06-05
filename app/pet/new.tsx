@@ -52,7 +52,7 @@ export default function CreatePet() {
   };
 
   return (
-    <Container>
+    <Container style={{ flex: 1 }}>
       <PetForm onSubmit={handleSubmit} submitLabel={loading ? 'Cadastrando...' : 'Cadastrar'} />
     </Container>
   );

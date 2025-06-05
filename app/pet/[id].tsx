@@ -5,8 +5,7 @@ import { getPetGenderLabel, getPetSizeLabel, getPetTypeLabel } from '@/utils/pet
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 export default function PetDetails() {
   const params = useLocalSearchParams();
@@ -25,8 +24,6 @@ export default function PetDetails() {
         type: data.type as PetType
       };
       setPet(petData);
-      
-      // Atualizar o título da tela com o nome do pet
       router.setParams({ name: petData.name });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Erro ao carregar pet';
@@ -49,26 +46,26 @@ export default function PetDetails() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#007AFF" />
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
   if (error || !pet) {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <View style={styles.centered}>
           <Text style={styles.errorText}>{error || 'Pet não encontrado'}</Text>
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <ScrollView style={styles.content} contentContainerStyle={{ paddingBottom: 32 }}>
         <View style={styles.imageWrapper}>
           {pet.image ? (
@@ -82,9 +79,6 @@ export default function PetDetails() {
               style={styles.image} 
             />
           )}
-          <TouchableOpacity style={styles.closeButton} onPress={() => router.back()}>
-            <MaterialCommunityIcons name="close" size={28} color="#222" />
-          </TouchableOpacity>
           <View style={styles.typeBadge}>
             <MaterialCommunityIcons name="paw" size={16} color="#fff" />
             <Text style={styles.typeBadgeText}>{getPetTypeLabel(pet.type as PetType)}</Text>
@@ -118,32 +112,15 @@ export default function PetDetails() {
           <View style={styles.infoCard}>
             <MaterialCommunityIcons name="map-marker" size={22} color="#888" />
             <Text style={styles.infoLabel}>Localização</Text>
-            <Text style={styles.infoValue}>{pet.user?.address || 'Não informado'}</Text>
+            <Text style={styles.infoValue}>{pet.location || 'Não informado'}</Text>
           </View>
         </View>
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Sobre</Text>
           <Text style={styles.sectionText}>{pet.description}</Text>
         </View>
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Contato</Text>
-          <View style={styles.contactRow}>
-            {pet.user?.whatsapp && (
-              <View style={styles.contactItem}>
-                <MaterialCommunityIcons name="whatsapp" size={22} color="#25D366" />
-                <Text style={styles.contactText}>{pet.user.whatsapp}</Text>
-              </View>
-            )}
-            {pet.user?.instagram && (
-              <View style={styles.contactItem}>
-                <MaterialCommunityIcons name="instagram" size={22} color="#C13584" />
-                <Text style={styles.contactText}>{pet.user.instagram}</Text>
-              </View>
-            )}
-          </View>
-        </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -262,24 +239,6 @@ const styles = StyleSheet.create({
     color: '#444',
     fontSize: 15,
     lineHeight: 22,
-  },
-  contactRow: {
-    flexDirection: 'row',
-    gap: 16,
-    marginTop: 8,
-  },
-  contactItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: '#F6F6F6',
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-  },
-  contactText: {
-    color: '#222',
-    fontSize: 14,
   },
   centered: {
     flex: 1,
