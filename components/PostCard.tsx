@@ -2,7 +2,7 @@ import { PetImage } from '@/components/PetImage';
 import { PetType, Post } from '@/types/database';
 import { getPetTypeLabel } from '@/utils/pet';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { router } from 'expo-router';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface PostCardProps extends Post {
@@ -12,10 +12,11 @@ interface PostCardProps extends Post {
 }
 
 export function PostCard({ showActions = false, onEdit, onDelete, ...props }: PostCardProps) {
-  const router = useRouter();
-
   const handlePress = () => {
-    router.push(`/post/${props.id}`);
+    router.push({
+      pathname: '/post/[id]' as const,
+      params: { id: props.id, title: props.title }
+    });
   };
 
   const formatDate = (date: Date | string) => {
@@ -79,8 +80,9 @@ export function PostCard({ showActions = false, onEdit, onDelete, ...props }: Po
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#fff',
-    borderRadius: 8,
+    borderRadius: 12,
     marginBottom: 16,
+    overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
