@@ -1,73 +1,58 @@
-import { PetImage } from '@/components/PetImage';
-import { PetType, Post } from '@/types/database';
-import { getPetTypeLabel } from '@/utils/pet';
-import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Post } from '@/types/database';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-interface PostCardProps extends Post {
+interface PostCardProps {
+  post: Post;
+  onPress?: () => void;
   showActions?: boolean;
   onEdit?: (id: string) => void;
-  onDelete?: (id: string) => void;
+  onDelete?: (post: Post) => void;
 }
 
-export function PostCard({ showActions = false, onEdit, onDelete, ...props }: PostCardProps) {
-  const handlePress = () => {
-    router.push({
-      pathname: '/post/[id]' as const,
-      params: { id: props.id, title: props.title }
-    });
-  };
-
-  const formatDate = (date: Date | string) => {
-    return new Date(date).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
-  };
-
-  const getTypeLabel = (type: Post['type']) => {
-    const options = {
-      'ADOPTION': 'Adoção',
-      'LOST': 'Perdido',
-      'FOUND': 'Encontrado',
-    }
-    return options[type];
-  };
+export function PostCard({ post, onPress, showActions, onEdit, onDelete }: PostCardProps) {
+  if (!post || !post.pet) {
+    return null;
+  }
 
   return (
-    <TouchableOpacity style={styles.container} onPress={handlePress}>
-      <PetImage pet={props.pet} style={styles.image} />
+    <TouchableOpacity style={styles.container} onPress={onPress}>
+      {post.pet.image ? (
+        <Image source={{ uri: post.pet.image }} style={styles.image} />
+      ) : (
+        <Image 
+          source={String(post.pet.type).toUpperCase() === 'DOG' 
+            ? require('@assets/images/default-dog.png')
+            : require('@assets/images/default-cat.png')
+          } 
+          style={styles.image} 
+        />
+      )}
       <View style={styles.content}>
-        <View style={styles.header}>
-          <Text style={styles.name}>{props.pet.name}</Text>
-          <View style={styles.badges}>
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>{getPetTypeLabel(props.pet.type as PetType)}</Text>
-            </View>
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>{getTypeLabel(props.type)}</Text>
-            </View>
-          </View>
+        <Text style={styles.title}>{post.title}</Text>
+        <Text style={styles.description} numberOfLines={2}>
+          {post.content}
+        </Text>
+        <View style={styles.metadata}>
+          <Text style={styles.date}>
+            {new Date(post.createdAt).toLocaleDateString('pt-BR')}
+          </Text>
+          <Text style={styles.author}>{post.user?.name || 'Usuário'}</Text>
         </View>
-        <Text style={styles.breed}>{props.pet.breed}</Text>
-        <Text style={styles.location}>{props.location}</Text>
-        <Text style={styles.date}>Publicado em {formatDate(props.createdAt)}</Text>
         {showActions && (
           <View style={styles.actions}>
             <TouchableOpacity 
-              style={[styles.actionButton, styles.editButton]}
-              onPress={() => onEdit?.(props.id)}
+              style={[styles.actionButton, styles.editButton]} 
+              onPress={() => onEdit?.(post.id)}
             >
-              <Ionicons name="pencil" size={16} color="#fff" />
+              <MaterialCommunityIcons name="pencil" size={16} color="#fff" />
               <Text style={styles.actionButtonText}>Editar</Text>
             </TouchableOpacity>
             <TouchableOpacity 
-              style={[styles.actionButton, styles.deleteButton]}
-              onPress={() => onDelete?.(props.id)}
+              style={[styles.actionButton, styles.deleteButton]} 
+              onPress={() => onDelete?.(post)}
             >
-              <Ionicons name="trash" size={16} color="#fff" />
+              <MaterialCommunityIcons name="delete" size={16} color="#fff" />
               <Text style={styles.actionButtonText}>Excluir</Text>
             </TouchableOpacity>
           </View>
@@ -81,8 +66,8 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: '#fff',
     borderRadius: 12,
-    marginBottom: 16,
     overflow: 'hidden',
+    marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -95,50 +80,33 @@ const styles = StyleSheet.create({
   image: {
     width: '100%',
     height: 200,
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
+    resizeMode: 'cover',
   },
   content: {
     padding: 16,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 8,
-  },
-  name: {
+  title: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
-    flex: 1,
+    color: '#222',
+    marginBottom: 8,
   },
-  badges: {
-    flexDirection: 'row',
-    gap: 4,
-  },
-  badge: {
-    backgroundColor: '#f0f0f0',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
-  },
-  badgeText: {
-    fontSize: 12,
-    color: '#666',
-    fontWeight: '500',
-  },
-  breed: {
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 4,
-  },
-  location: {
+  description: {
     fontSize: 14,
-    color: '#999',
-    marginBottom: 4,
+    color: '#666',
+    marginBottom: 12,
+    lineHeight: 20,
+  },
+  metadata: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   date: {
+    fontSize: 12,
+    color: '#999',
+  },
+  author: {
     fontSize: 12,
     color: '#999',
   },
@@ -146,10 +114,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-end',
     gap: 8,
+    marginTop: 12,
     borderTopWidth: 1,
     borderTopColor: '#f0f0f0',
     paddingTop: 12,
-    marginTop: 12,
   },
   actionButton: {
     flexDirection: 'row',

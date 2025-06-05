@@ -1,4 +1,3 @@
-import { PetImage } from '@/components/PetImage';
 import { showToast } from '@/components/ui/Toast';
 import { petsService } from '@/services/petsService';
 import { Pet, PetGender, PetSize, PetType } from '@/types/database';
@@ -6,7 +5,7 @@ import { getPetGenderLabel, getPetSizeLabel, getPetTypeLabel } from '@/utils/pet
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function PetDetails() {
@@ -72,7 +71,17 @@ export default function PetDetails() {
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.content} contentContainerStyle={{ paddingBottom: 32 }}>
         <View style={styles.imageWrapper}>
-          <PetImage pet={pet} />
+          {pet.image ? (
+            <Image source={{ uri: pet.image }} style={styles.image} />
+          ) : (
+            <Image 
+              source={String(pet.type).toUpperCase() === 'DOG' 
+                ? require('@assets/images/default-dog.png')
+                : require('@assets/images/default-cat.png')
+              } 
+              style={styles.image} 
+            />
+          )}
           <TouchableOpacity style={styles.closeButton} onPress={() => router.back()}>
             <MaterialCommunityIcons name="close" size={28} color="#222" />
           </TouchableOpacity>

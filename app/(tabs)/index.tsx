@@ -121,7 +121,7 @@ export default function Home() {
           <FlatList
             data={posts}
             keyExtractor={(item) => item.id}
-            renderItem={({ item }) => <PostCard {...item} />}
+            renderItem={({ item }) => <PostCard post={item} onPress={() => router.push(`/post/${item.id}`)} />}
             contentContainerStyle={[
               styles.list,
               !posts.length && styles.emptyList

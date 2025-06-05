@@ -2,7 +2,8 @@ import { Container } from '@/components/ui/Container';
 import { ImageHeader } from '@/components/ui/ImageHeader';
 import { InfoGrid } from '@/components/ui/InfoGrid';
 import { showToast } from '@/components/ui/Toast';
-import { Post, postsService } from '@/services/postsService';
+import { postsService } from '@/services/postsService';
+import { PetType, Post } from '@/types/database';
 import { getPetGenderLabel, getPetSizeLabel, getPetTypeLabel, getPostTypeLabel } from '@/utils/pet';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -65,7 +66,7 @@ export default function PostDetails() {
     <Container>
       <ScrollView style={styles.content} contentContainerStyle={{ paddingBottom: 32 }}>
         <ImageHeader
-          imageUrl={post.pet.image}
+          pet={post.pet}
           onClose={() => router.back()}
           badgeText={getPostTypeLabel(post.type)}
           badgeIcon="paw"
@@ -74,7 +75,7 @@ export default function PostDetails() {
         <Text style={styles.postTitle}>{post.title}</Text>
         <Text style={styles.petName}>{post.pet.name}</Text>
         <View style={styles.headerRow}>
-          <View style={styles.badge}><Text style={styles.badgeText}>{getPetTypeLabel(post.pet.type)}</Text></View>
+          <View style={styles.badge}><Text style={styles.badgeText}>{getPetTypeLabel(post.pet.type as PetType)}</Text></View>
         </View>
         <InfoGrid
           items={[

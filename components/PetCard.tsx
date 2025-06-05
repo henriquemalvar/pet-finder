@@ -1,9 +1,8 @@
-import { PetImage } from '@/components/PetImage';
 import { Pet, PetType } from '@/types/database';
 import { getPetGenderLabel, getPetSizeLabel, getPetTypeLabel } from '@/utils/pet';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface PetCardProps {
   pet: Pet;
@@ -16,11 +15,18 @@ export function PetCard({ pet, showActions = false, onEdit, onDelete }: PetCardP
   const router = useRouter();
 
   return (
-    <TouchableOpacity 
-      style={styles.petCard}
-      onPress={() => router.push(`/pet/${pet.id}`)}
-    >
-      <PetImage pet={pet} style={styles.petImage} />
+    <TouchableOpacity style={styles.container} onPress={() => router.push(`/pet/${pet.id}`)}>
+      {pet.image ? (
+        <Image source={{ uri: pet.image }} style={styles.image} />
+      ) : (
+        <Image 
+          source={String(pet.type).toUpperCase() === 'DOG' 
+            ? require('@assets/images/default-dog.png')
+            : require('@assets/images/default-cat.png')
+          } 
+          style={styles.image} 
+        />
+      )}
       <View style={styles.content}>
         <View style={styles.header}>
           <Text style={styles.name}>{pet.name}</Text>
@@ -80,9 +86,10 @@ export function PetCard({ pet, showActions = false, onEdit, onDelete }: PetCardP
 }
 
 const styles = StyleSheet.create({
-  petCard: {
+  container: {
     backgroundColor: '#fff',
-    borderRadius: 8,
+    borderRadius: 12,
+    overflow: 'hidden',
     marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: {
@@ -93,11 +100,10 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  petImage: {
+  image: {
     width: '100%',
     height: 200,
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
+    resizeMode: 'cover',
   },
   content: {
     padding: 16,
@@ -111,7 +117,7 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#222',
     flex: 1,
   },
   badges: {
@@ -130,7 +136,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   breed: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#666',
     marginBottom: 4,
   },

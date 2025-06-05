@@ -1,11 +1,9 @@
-import { PetImage } from '@/components/PetImage';
-import { Header } from '@/components/ui/Header';
 import { postsService } from '@/services/postsService';
 import { Post } from '@/types/database';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function PostList() {
@@ -47,7 +45,17 @@ export default function PostList() {
       style={styles.postCard}
       onPress={() => handlePostPress(item.id)}
     >
-      <PetImage pet={item.pet} style={styles.postImage} />
+      {item.pet.image ? (
+        <Image source={{ uri: item.pet.image }} style={styles.postImage} />
+      ) : (
+        <Image 
+          source={String(item.pet.type).toUpperCase() === 'DOG' 
+            ? require('@assets/images/default-dog.png')
+            : require('@assets/images/default-cat.png')
+          } 
+          style={styles.postImage} 
+        />
+      )}
       <View style={styles.postInfo}>
         <Text style={styles.postTitle}>{item.pet.name}</Text>
         <Text style={styles.postDescription} numberOfLines={2}>

@@ -138,7 +138,7 @@ export default function CreatePost() {
   }, [user?.id, loadPets]);
 
   const handleCreatePet = () => {
-    router.push('/pet/create');
+    router.push('/pet/new');
   };
 
   const handleImagePick = async () => {

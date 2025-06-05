@@ -1,5 +1,6 @@
 import { ConfirmDeleteModal } from '@/components/ui/ConfirmDeleteModal';
 import { Container } from '@/components/ui/Container';
+import { FAB } from '@/components/ui/FAB';
 import { ListState } from '@/components/ui/ListState';
 import { showToast } from '@/components/ui/Toast';
 import { postsService } from '@/services/postsService';
@@ -78,16 +79,6 @@ export default function MyPosts() {
     }
   };
 
-  if (loading || activityIndicatorVisible) {
-    return (
-      <Container>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#007AFF" />
-        </View>
-      </Container>
-    );
-  }
-
   if (error) {
     return (
       <Container>
@@ -107,40 +98,49 @@ export default function MyPosts() {
             />
           }
         />
+        <FAB onPress={() => router.push('/post/new')} />
       </Container>
     );
   }
 
   return (
     <Container>
-      <FlatList
-        data={posts}
-        renderItem={({ item }) => (
-          <PostCard
-            {...item}
-            showActions
-            onEdit={() => handleEdit(item.id)}
-            onDelete={() => handleDelete(item)}
-          />
-        )}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={[
-          styles.list,
-          (!posts.length || loading) && styles.emptyList
-        ]}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-        }
-        ListEmptyComponent={
-          !loading && posts.length === 0 ? (
-            <ListState 
-              type="empty" 
-              message="Você ainda não tem posts. Clique no botão + para criar um novo post."
+      {loading || activityIndicatorVisible ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#007AFF" />
+        </View>
+      ) : (
+        <FlatList
+          data={posts}
+          renderItem={({ item }) => (
+            <PostCard
+              post={item}
+              showActions
+              onEdit={() => handleEdit(item.id)}
+              onDelete={() => handleDelete(item)}
             />
-          ) : null
-        }
-      />
+          )}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={[
+            styles.list,
+            (!posts.length || loading) && styles.emptyList
+          ]}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+          }
+          ListEmptyComponent={
+            !loading && posts.length === 0 ? (
+              <ListState 
+                type="empty" 
+                message="Você ainda não tem posts. Clique no botão + para criar um novo post."
+              />
+            ) : null
+          }
+        />
+      )}
+
+      <FAB onPress={() => router.push('/post/new')} />
 
       <ConfirmDeleteModal
         visible={deleteModalVisible}

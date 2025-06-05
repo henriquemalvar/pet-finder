@@ -1,12 +1,10 @@
-import { PetImage } from '@/components/PetImage';
-import { Header } from '@/components/ui/Header';
 import { petsService } from '@/services/petsService';
 import { Pet } from '@/types/database';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@hooks/useAuth';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function PetList() {
@@ -49,7 +47,17 @@ export default function PetList() {
       style={styles.petCard}
       onPress={() => handlePetPress(item.id)}
     >
-      <PetImage pet={item} style={styles.petImage} />
+      {item.image ? (
+        <Image source={{ uri: item.image }} style={styles.petImage} />
+      ) : (
+        <Image 
+          source={String(item.type).toUpperCase() === 'DOG' 
+            ? require('@assets/images/default-dog.png')
+            : require('@assets/images/default-cat.png')
+          } 
+          style={styles.petImage} 
+        />
+      )}
       <View style={styles.petInfo}>
         <Text style={styles.petName}>{item.name}</Text>
         <Text style={styles.petBreed}>{item.breed}</Text>
@@ -74,7 +82,8 @@ export default function PetList() {
           <Text style={styles.errorText}>{error}</Text>
         </View>
       ) : (
-        <FlatList
+        pets.length > 0 ? (
+          <FlatList
           data={pets}
           renderItem={renderPetItem}
           keyExtractor={(item) => item.id}
@@ -87,6 +96,11 @@ export default function PetList() {
             </View>
           }
         />
+        ) : (
+          <View style={styles.centered}>
+            <Text>Nenhum pet encontrado</Text>
+          </View>
+        )
       )}
     </SafeAreaView>
   );

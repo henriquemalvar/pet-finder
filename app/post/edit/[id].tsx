@@ -117,7 +117,7 @@ export default function EditPost() {
   }, [loadPets, loadPost]);
 
   const handleCreatePet = () => {
-    router.push('/pet/create');
+    router.push('/pet/new');
   };
 
   const onSubmit = async (data: PostFormData) => {

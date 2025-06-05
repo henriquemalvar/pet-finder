@@ -1,8 +1,8 @@
-import { User } from '@/types/database';
+import { UserWithToken } from '@/types/database';
 import { StyleSheet, Text, View } from 'react-native';
 
 interface UserCardProps {
-  user: User | null;
+  user: UserWithToken | null;
   size?: 'small' | 'medium' | 'large';
   showEmail?: boolean;
   style?: any;

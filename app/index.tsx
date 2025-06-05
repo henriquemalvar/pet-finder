@@ -14,7 +14,6 @@ export default function Index() {
   const initialize = async () => {
     try {
       setError(null);
-      // Aqui você pode adicionar qualquer lógica de inicialização necessária
       setLoading(false);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Erro ao inicializar o aplicativo';

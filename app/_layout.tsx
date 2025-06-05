@@ -50,7 +50,7 @@ export default function RootLayout() {
                   headerBackTitle: 'Voltar'
                 })} 
               />
-              <Stack.Screen name='post/create' options={{ headerShown: true, headerTitle: 'Criar Post' }} />
+              <Stack.Screen name='post/new' options={{ headerShown: true, headerTitle: 'Criar Post' }} />
               <Stack.Screen name='post/edit/[id]' options={{ headerShown: true, headerTitle: 'Editar Post' }} />
               
               <Stack.Screen name="pet/index" options={{ headerShown: true, headerTitle: 'Pets' }} />
@@ -62,7 +62,7 @@ export default function RootLayout() {
                   headerBackTitle: 'Voltar'
                 })} 
               />
-              <Stack.Screen name="pet/create" options={{ headerShown: true, headerTitle: 'Criar Pet' }} />
+              <Stack.Screen name="pet/new" options={{ headerShown: true, headerTitle: 'Criar Pet' }} />
               <Stack.Screen name="pet/edit/[id]" options={{ headerShown: true, headerTitle: 'Editar Pet' }} />
 
               <Stack.Screen name="search" options={{ headerShown: true, headerTitle: 'Pesquisar' }} />

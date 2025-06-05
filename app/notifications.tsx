@@ -6,7 +6,7 @@ import { Swipeable } from 'react-native-gesture-handler';
 
 interface Notification {
   id: string;
-  type: 'found' | 'lost' | 'adoption' | 'match';
+  type: 'found' | 'lost' | 'adoption';
   title: string;
   message: string;
   time: string;

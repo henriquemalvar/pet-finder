@@ -1,5 +1,6 @@
 import { ConfirmDeleteModal } from '@/components/ui/ConfirmDeleteModal';
 import { Container } from '@/components/ui/Container';
+import { FAB } from '@/components/ui/FAB';
 import { ListState } from '@/components/ui/ListState';
 import { showToast } from '@/components/ui/Toast';
 import { petsService } from '@/services/petsService';
@@ -96,50 +97,49 @@ export default function MyPets() {
             />
           }
         />
-      </Container>
-    );
-  }
-
-  if (loading || activityIndicatorVisible) {
-    return (
-      <Container>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#007AFF" />
-        </View>
+        <FAB onPress={() => router.push('/pet/new')} />
       </Container>
     );
   }
 
   return (
     <Container>
-      <FlatList
-        data={pets}
-        renderItem={({ item }) => (
-          <PetCard
-            pet={item}
-            showActions
-            onEdit={handleEdit}
-            onDelete={() => handleDelete(item)}
-          />
-        )}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={[
-          styles.list,
-          (!pets.length || loading) && styles.emptyList
-        ]}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-        }
-        ListEmptyComponent={
-          !loading && pets.length === 0 ? (
-            <ListState 
-              type="empty" 
-              message="Você ainda não tem pets cadastrados. Clique no botão + para adicionar um novo pet."
+      {loading || activityIndicatorVisible ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#007AFF" />
+        </View>
+      ) : (
+        <FlatList
+          data={pets}
+          renderItem={({ item }) => (
+            <PetCard
+              pet={item}
+              showActions
+              onEdit={handleEdit}
+              onDelete={() => handleDelete(item)}
             />
-          ) : null
-        }
-      />
+          )}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={[
+            styles.list,
+            (!pets.length || loading) && styles.emptyList
+          ]}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+          }
+          ListEmptyComponent={
+            !loading && pets.length === 0 ? (
+              <ListState 
+                type="empty" 
+                message="Você ainda não tem pets cadastrados. Clique no botão + para adicionar um novo pet."
+              />
+            ) : null
+          }
+        />
+      )}
+
+      <FAB onPress={() => router.push('/pet/new')} />
 
       <ConfirmDeleteModal
         visible={deleteModalVisible}

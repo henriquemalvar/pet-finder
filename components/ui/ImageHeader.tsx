@@ -1,40 +1,42 @@
-import { PetImage } from '@/components/PetImage';
 import { Pet } from '@/types/database';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface ImageHeaderProps {
   pet: Pet;
   onClose: () => void;
   badgeText: string;
-  badgeIcon: string;
+  badgeIcon: keyof typeof MaterialCommunityIcons.glyphMap;
   badgeColor?: string;
 }
 
-export const ImageHeader: React.FC<ImageHeaderProps> = ({
-  pet,
-  onClose,
-  badgeText,
-  badgeIcon,
-  badgeColor = '#3CB371',
-}) => {
+export function ImageHeader({ pet, onClose, badgeText, badgeIcon, badgeColor = '#3CB371' }: ImageHeaderProps) {
   return (
-    <View style={styles.imageWrapper}>
-      <PetImage pet={pet} />
+    <View style={styles.container}>
+      {pet.image ? (
+        <Image source={{ uri: pet.image }} style={styles.image} />
+      ) : (
+        <Image 
+          source={String(pet.type).toUpperCase() === 'DOG' 
+            ? require('@assets/images/default-dog.png')
+            : require('@assets/images/default-cat.png')
+          } 
+          style={styles.image} 
+        />
+      )}
       <TouchableOpacity style={styles.closeButton} onPress={onClose}>
         <MaterialCommunityIcons name="close" size={28} color="#222" />
       </TouchableOpacity>
-      <View style={[styles.typeBadge, { backgroundColor: badgeColor }]}> 
+      <View style={[styles.typeBadge, { backgroundColor: badgeColor }]}>
         <MaterialCommunityIcons name={badgeIcon} size={16} color="#fff" />
         <Text style={styles.typeBadgeText}>{badgeText}</Text>
       </View>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  imageWrapper: {
+  container: {
     position: 'relative',
     backgroundColor: '#eee',
   },
