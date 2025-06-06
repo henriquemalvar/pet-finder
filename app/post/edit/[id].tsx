@@ -18,7 +18,6 @@ const postSchema = z.object({
   type: z.nativeEnum(PostType),
   title: z.string().min(1, 'Título é obrigatório'),
   content: z.string().min(10, 'A descrição deve ter pelo menos 10 caracteres'),
-  contact: z.string().min(1, 'Contato é obrigatório'),
 });
 
 type PostFormData = z.infer<typeof postSchema>;
@@ -47,7 +46,6 @@ export default function EditPost() {
       type: PostType.ADOPTION,
       title: '',
       content: '',
-      contact: '',
     }
   });
 
@@ -59,7 +57,6 @@ export default function EditPost() {
       setValue('type', post.type);
       setValue('title', post.title);
       setValue('content', post.content);
-      setValue('contact', post.user.contactPreference || '');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Erro ao carregar post';
       showToast.error('Erro', errorMessage);
@@ -108,11 +105,6 @@ export default function EditPost() {
     }
   }, [id, loadPost]);
 
-  useEffect(() => {
-    loadPets();
-    loadPost();
-  }, [loadPets, loadPost]);
-
   const handleCreatePet = () => {
     router.push('/pet/new');
   };
@@ -126,7 +118,12 @@ export default function EditPost() {
         throw new Error('Pet não encontrado');
       }
 
+      if (!user?.id) {
+        throw new Error('Usuário não autenticado');
+      }
+
       await postsService.update(id, {
+        petId: data.petId,
         type: data.type,
         title: data.title,
         content: data.content,
@@ -248,25 +245,6 @@ export default function EditPost() {
                 />
                 {errors.content && (
                   <Text style={styles.errorText}>{errors.content.message}</Text>
-                )}
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Contato</Text>
-                <Controller
-                  control={control}
-                  name="contact"
-                  render={({ field: { onChange, value } }) => (
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Digite o contato"
-                      value={value}
-                      onChangeText={onChange}
-                    />
-                  )}
-                />
-                {errors.contact && (
-                  <Text style={styles.errorText}>{errors.contact.message}</Text>
                 )}
               </View>
 

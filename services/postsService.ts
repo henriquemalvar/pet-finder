@@ -38,6 +38,7 @@ export type UpdatePostData = {
   content?: string;
   type?: PostType;
   status?: PostStatus;
+  petId?: string;
 };
 
 export const postsService = {
